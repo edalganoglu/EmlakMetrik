@@ -28,18 +28,18 @@ export const Colors = {
     card: lightSurface,
   },
   dark: {
-    text: '#f8fafc',
-    background: darkBg,
-    surface: darkSurface,
-    primary: primary,
+    text: '#e2e8f0', // Slate 200
+    background: '#0f172a', // Slate 900
+    surface: '#1e293b', // Slate 800
+    primary: '#4f85f6', // Brighter blue for dark mode
     secondary: secondary,
-    tint: primary,
+    tint: '#4f85f6',
     icon: '#94a3b8',
     tabIconDefault: '#64748b',
-    tabIconSelected: '#f8fafc',
+    tabIconSelected: '#4f85f6',
     border: '#334155',
     error: '#ef4444',
-    card: darkSurface,
+    card: '#1e293b', // Slate 800
   },
 };
 

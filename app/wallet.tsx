@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/Skeleton';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthProvider';
 import { supabase } from '@/lib/supabase';
@@ -11,10 +12,29 @@ export default function WalletScreen() {
     const { user } = useAuth();
     const router = useRouter();
     const [balance, setBalance] = useState(0);
+    const [transactions, setTransactions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (!user) return;
         fetchBalance();
+        fetchTransactions();
+
+        // Subscribe to balance changes
+        const subscription = supabase
+            .channel('balance_updates')
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
+                (payload) => {
+                    setBalance(payload.new.credit_balance);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            subscription.unsubscribe();
+        }
     }, [user]);
 
     async function fetchBalance() {
@@ -22,14 +42,54 @@ export default function WalletScreen() {
         if (data) setBalance(data.credit_balance);
     }
 
+    async function fetchTransactions() {
+        const { data } = await supabase
+            .from('wallet_transactions')
+            .select('*')
+            .eq('user_id', user!.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+        if (data) setTransactions(data);
+    }
+
+    async function addTransaction(amount: number, type: 'deposit' | 'spend' | 'reward', description: string) {
+        setLoading(true);
+        const { error } = await supabase.from('wallet_transactions').insert({
+            user_id: user!.id,
+            amount,
+            type,
+            description
+        });
+        setLoading(false);
+
+        if (error) {
+            Alert.alert('Error', error.message);
+        } else {
+            // Trigger UI update logic implies balance updates via trigger -> subscription
+            fetchTransactions();
+            if (type === 'reward' || type === 'deposit') {
+                Alert.alert('Success', `Successfully received ${amount} credits!`);
+            }
+        }
+    }
+
     async function watchAd() {
-        Alert.alert('Video İzle', 'Reklam izlendi! (Simülasyon: +2 Kredi)');
-        // Mock backend update
-        setBalance(prev => prev + 2);
+        // Simulation
+        setTimeout(() => {
+            addTransaction(2, 'reward', 'Watched Video Ad');
+        }, 1000);
     }
 
     async function buyCredits(amount: number, price: string) {
-        Alert.alert('Satın Al', `${price} karşılığında ${amount} kredi satın alma işlemi başlatılıyor...`);
+        // In a real app, this would integrate with IAP/Stripe
+        Alert.alert(
+            'Confirm Purchase',
+            `Buy ${amount} Credits for ${price}?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Buy', onPress: () => addTransaction(amount, 'deposit', `Purchased ${amount} Credits Pack`) }
+            ]
+        );
     }
 
     return (
@@ -37,7 +97,7 @@ export default function WalletScreen() {
             {/* Top App Bar */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <MaterialIcons name="arrow-back" size={24} color="#111318" />
+                    <MaterialIcons name="arrow-back" size={24} color={Colors.dark.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Cüzdanım</Text>
                 <View style={{ width: 40 }} />
@@ -67,7 +127,7 @@ export default function WalletScreen() {
                     <View style={styles.freeCard}>
                         <View style={styles.freeHeader}>
                             <View style={styles.playIconWrapper}>
-                                <MaterialIcons name="play-circle" size={28} color={Colors.light.primary} />
+                                <MaterialIcons name="play-circle" size={28} color={Colors.dark.primary} />
                             </View>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.freeTitle}>Video İzle</Text>
@@ -119,7 +179,7 @@ export default function WalletScreen() {
                             <View style={[styles.packageCardInner, { paddingTop: 8 }]}>
                                 <View style={styles.packageLeft}>
                                     <View style={styles.packageIconBgPro}>
-                                        <MaterialIcons name="diamond" size={24} color={Colors.light.primary} />
+                                        <MaterialIcons name="diamond" size={24} color={Colors.dark.primary} />
                                     </View>
                                     <View>
                                         <Text style={styles.packageName}>Pro</Text>
@@ -156,19 +216,56 @@ export default function WalletScreen() {
                     </View>
                 </View>
 
-                {/* Transaction History Link */}
+                {/* Transaction History */}
                 <View style={styles.historySection}>
-                    <TouchableOpacity style={styles.historyCard}>
-                        <View style={styles.historyLeft}>
-                            <View style={styles.historyIconBg}>
-                                <MaterialIcons name="history" size={20} color="#64748b" />
-                            </View>
-                            <View>
-                                <Text style={styles.historyTitle}>İşlem Geçmişi</Text>
-                                <Text style={styles.historySubtitle}>Son harcamalarınızı görüntüleyin</Text>
-                            </View>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Recent Transactions</Text>
+                    </View>
+
+                    {loading ? (
+                        <View style={{ padding: 16 }}>
+                            {[1, 2, 3].map(i => (
+                                <View key={i} style={styles.historyCard}>
+                                    <Skeleton width={40} height={40} borderRadius={20} />
+                                    <View style={{ flex: 1, gap: 6, marginLeft: 12 }}>
+                                        <Skeleton width={120} height={14} />
+                                        <Skeleton width={80} height={12} />
+                                    </View>
+                                    <Skeleton width={50} height={16} />
+                                </View>
+                            ))}
                         </View>
-                        <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
+                    ) : transactions.length === 0 ? (
+                        <View style={styles.emptyState}>
+                            <MaterialIcons name="history" size={48} color="#cbd5e1" />
+                            <Text style={styles.emptyText}>No recent transactions</Text>
+                        </View>
+                    ) : (
+                        transactions.map((tx) => (
+                            <View key={tx.id} style={styles.historyCard}>
+                                <View style={styles.historyLeft}>
+                                    <View style={[styles.historyIconBg, tx.amount > 0 ? { backgroundColor: 'rgba(22, 101, 52, 0.2)' } : { backgroundColor: 'rgba(153, 27, 27, 0.2)' }]}>
+                                        <MaterialIcons
+                                            name={tx.type === 'reward' ? 'play-circle' : tx.type === 'deposit' ? 'add-card' : 'remove-circle'}
+                                            size={20}
+                                            color={tx.amount > 0 ? '#4ade80' : '#f87171'}
+                                        />
+                                    </View>
+                                    <View>
+                                        <Text style={styles.historyTitle}>{tx.description}</Text>
+                                        <Text style={styles.historySubtitle}>{new Date(tx.created_at).toLocaleDateString()}</Text>
+                                    </View>
+                                </View>
+                                <Text style={[styles.historyAmount, tx.amount > 0 ? { color: '#4ade80' } : { color: '#f87171' }]}>
+                                    {tx.amount > 0 ? '+' : ''}{tx.amount}
+                                </Text>
+                            </View>
+                        ))
+                    )}
+
+                    <TouchableOpacity style={styles.viewAllButton}>
+                        <Text style={styles.viewAllText}>View All History</Text>
+                        <MaterialIcons name="chevron-right" size={20} color="#64748b" />
                     </TouchableOpacity>
                 </View>
 
@@ -180,8 +277,7 @@ export default function WalletScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff', // Use white background as base to match cleaner look if desired, or light gray.
-        // HTML body bg is bg-background-light (#f6f6f8). Let's stick to that for outer, but SafeArea is typically white.
+        backgroundColor: Colors.dark.background,
     },
     header: {
         flexDirection: 'row',
@@ -189,9 +285,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.background,
         borderBottomWidth: 1,
-        borderBottomColor: '#dbdfe6',
+        borderBottomColor: Colors.dark.border,
     },
     backButton: {
         width: 48,
@@ -199,16 +295,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 24,
-        // hover effect not applicable in RN directly same way
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
         textAlign: 'center',
     },
     content: {
-        backgroundColor: '#f6f6f8',
+        backgroundColor: Colors.dark.background,
         padding: 16,
         paddingBottom: 40,
         gap: 24,
@@ -216,12 +311,12 @@ const styles = StyleSheet.create({
 
     // Balance Card
     balanceCard: {
-        backgroundColor: Colors.light.primary,
+        backgroundColor: Colors.dark.primary,
         borderRadius: 16,
         padding: 24,
         overflow: 'hidden',
         position: 'relative',
-        shadowColor: Colors.light.primary,
+        shadowColor: Colors.dark.primary,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.3,
         shadowRadius: 16,
@@ -280,24 +375,30 @@ const styles = StyleSheet.create({
     section: {
         gap: 12,
     },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
         paddingHorizontal: 4,
     },
 
     // Free Earn
     freeCard: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         borderRadius: 12,
         padding: 20,
         borderWidth: 1,
-        borderColor: '#dbdfe6',
+        borderColor: Colors.dark.border,
         gap: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 1,
     },
@@ -310,30 +411,30 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: 'rgba(19, 91, 236, 0.1)',
+        backgroundColor: 'rgba(79, 133, 246, 0.1)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     freeTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
         marginBottom: 4,
     },
     freeDesc: {
         fontSize: 14,
-        color: '#616f89',
+        color: '#94a3b8',
         lineHeight: 20,
     },
     watchButton: {
-        backgroundColor: Colors.light.primary,
+        backgroundColor: Colors.dark.primary,
         borderRadius: 8,
         height: 40,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         gap: 8,
-        shadowColor: Colors.light.primary,
+        shadowColor: Colors.dark.primary,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
@@ -353,7 +454,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
     },
     restoreText: {
-        color: Colors.light.primary,
+        color: Colors.dark.primary,
         fontSize: 14,
         fontWeight: '600',
     },
@@ -361,19 +462,19 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     packageCard: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#dbdfe6',
+        borderColor: Colors.dark.border,
         padding: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 1,
     },
     packagePro: {
-        borderColor: Colors.light.primary,
+        borderColor: Colors.dark.primary,
         borderWidth: 2,
         position: 'relative',
         overflow: 'hidden',
@@ -382,7 +483,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 0,
         right: 0,
-        backgroundColor: Colors.light.primary,
+        backgroundColor: Colors.dark.primary,
         borderBottomLeftRadius: 8,
         paddingHorizontal: 8,
         paddingVertical: 4,
@@ -407,25 +508,27 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 8,
-        backgroundColor: '#f3f4f6',
+        backgroundColor: Colors.dark.background,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
     },
     packageIconBgPro: {
         width: 48,
         height: 48,
         borderRadius: 8,
-        backgroundColor: 'rgba(19, 91, 236, 0.1)',
+        backgroundColor: 'rgba(79, 133, 246, 0.1)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     packageName: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
     },
     creditsText: {
-        color: Colors.light.primary,
+        color: Colors.dark.primary,
         fontWeight: '800',
         fontSize: 20,
     },
@@ -435,10 +538,10 @@ const styles = StyleSheet.create({
     creditsUnit: {
         fontSize: 12,
         fontWeight: 'normal',
-        color: '#616f89',
+        color: '#94a3b8',
     },
     creditsTextPro: {
-        color: Colors.light.primary,
+        color: Colors.dark.primary,
         fontWeight: '800',
         fontSize: 20,
     },
@@ -446,28 +549,30 @@ const styles = StyleSheet.create({
         // Inherits
     },
     priceButton: {
-        backgroundColor: '#f0f2f4',
+        backgroundColor: Colors.dark.background,
         borderRadius: 8,
         height: 40,
         paddingHorizontal: 16,
         justifyContent: 'center',
         alignItems: 'center',
         minWidth: 90,
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
     },
     priceButtonText: {
-        color: '#111318',
+        color: Colors.dark.text,
         fontWeight: 'bold',
         fontSize: 14,
     },
     priceButtonPro: {
-        backgroundColor: Colors.light.primary,
+        backgroundColor: Colors.dark.primary,
         borderRadius: 8,
         height: 40,
         paddingHorizontal: 16,
         justifyContent: 'center',
         alignItems: 'center',
         minWidth: 90,
-        shadowColor: Colors.light.primary,
+        shadowColor: Colors.dark.primary,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -481,15 +586,32 @@ const styles = StyleSheet.create({
 
     // History
     historySection: {
-        marginTop: 8,
-        borderTopWidth: 1,
-        borderTopColor: '#dbdfe6',
-        paddingTop: 24,
+        marginTop: 24,
+        paddingTop: 16,
+        gap: 12,
     },
     historyCard: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.dark.border,
+    },
+    historyAmount: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    viewAllButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        gap: 4,
+    },
+    viewAllText: {
+        color: '#94a3b8',
+        fontWeight: '600',
     },
     historyLeft: {
         flexDirection: 'row',
@@ -500,17 +622,29 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#f3f4f6',
+        backgroundColor: Colors.dark.background,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
     },
     historyTitle: {
         fontSize: 14,
         fontWeight: '500',
-        color: '#111318',
+        color: Colors.dark.text,
     },
     historySubtitle: {
         fontSize: 12,
-        color: '#616f89',
+        color: '#94a3b8',
+    },
+    emptyState: {
+        alignItems: 'center',
+        paddingVertical: 32,
+        gap: 8,
+    },
+    emptyText: {
+        color: '#94a3b8',
+        fontSize: 14,
+        fontWeight: '500',
     },
 });

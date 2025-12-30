@@ -50,12 +50,12 @@ export default function HomeScreen() {
       <View style={styles.topAppBar}>
         <View style={styles.appTitleContainer}>
           <View style={styles.appIconWrapper}>
-            <MaterialIcons name="apartment" size={24} color={Colors.light.primary} />
+            <MaterialIcons name="apartment" size={24} color={Colors.dark.primary} />
           </View>
           <Text style={styles.appTitle}>Emlak Asistanı</Text>
         </View>
         <TouchableOpacity style={styles.notificationButton}>
-          <MaterialIcons name="notifications-none" size={24} color={Colors.light.icon} />
+          <MaterialIcons name="notifications-none" size={24} color={Colors.dark.icon} />
         </TouchableOpacity>
       </View>
 
@@ -77,7 +77,7 @@ export default function HomeScreen() {
           <TouchableOpacity onPress={() => router.push('/wallet')}>
             <View style={styles.creditBadgeContainer}>
               <View style={styles.creditLabelRow}>
-                <MaterialIcons name="account-balance-wallet" size={20} color={Colors.light.primary} />
+                <MaterialIcons name="account-balance-wallet" size={20} color={Colors.dark.primary} />
                 <Text style={styles.creditLabel}>Bakiye Durumu</Text>
               </View>
               <View style={styles.creditValueBadge}>
@@ -167,7 +167,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.dark.background,
   },
   contentList: {
     paddingBottom: 100,
@@ -182,9 +182,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: Colors.dark.background,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomColor: Colors.dark.border,
   },
   appTitleContainer: {
     flexDirection: 'row',
@@ -195,14 +195,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(19, 91, 236, 0.1)', // Primary opacity
+    backgroundColor: 'rgba(79, 133, 246, 0.1)', // Primary opacity
     justifyContent: 'center',
     alignItems: 'center',
   },
   appTitle: {
     fontSize: 18,
     fontWeight: '800', // Extra bold
-    color: '#0f172a',
+    color: Colors.dark.text,
     letterSpacing: -0.5,
   },
   notificationButton: {
@@ -220,14 +220,16 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   profileCard: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.dark.card,
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.2, // Darker shadow for dark mode
     shadowRadius: 4,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   profileRow: {
     flexDirection: 'row',
@@ -240,18 +242,18 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     borderWidth: 2,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#cbd5e1',
+    borderColor: Colors.dark.primary, // Pop the avatar
+    backgroundColor: Colors.dark.surface,
   },
   greetingText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#64748b',
+    color: '#94a3b8',
   },
   userName: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#0f172a',
+    color: Colors.dark.text,
     letterSpacing: -0.5,
   },
 
@@ -260,7 +262,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f8fafc', // Light bg
+    backgroundColor: 'rgba(255,255,255,0.05)', // Subtle contrast overlay
     padding: 12,
     borderRadius: 12,
   },
@@ -272,10 +274,10 @@ const styles = StyleSheet.create({
   creditLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#475569',
+    color: '#cbd5e1',
   },
   creditValueBadge: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: Colors.dark.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -298,27 +300,30 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0f172a',
+    color: Colors.dark.text,
   },
   seeAllText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.light.primary,
+    color: Colors.dark.primary,
   },
 
   // List Item Styles
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.dark.card,
     marginHorizontal: 16,
     marginBottom: 12,
     padding: 12,
     borderRadius: 16,
     gap: 12,
+    // Add border for dark mode definition
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
@@ -326,12 +331,13 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 12,
-    backgroundColor: '#e2e8f0',
+    backgroundColor: Colors.dark.background,
     overflow: 'hidden',
   },
   cardImage: {
     width: '100%',
     height: '100%',
+    opacity: 0.8, // Slightly dim images to blend better
   },
   cardContent: {
     flex: 1,
@@ -341,12 +347,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0f172a',
+    color: Colors.dark.text,
   },
   cardSubtitle: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#64748b',
+    color: '#94a3b8',
   },
   statusBadge: {
     flexDirection: 'row',
@@ -363,7 +369,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#16a34a', // Green 600
+    color: '#4ade80', // Green 400 (Brighter for dark mode)
     textTransform: 'uppercase',
   },
   cardPriceContainer: {
@@ -373,7 +379,7 @@ const styles = StyleSheet.create({
   cardPrice: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.light.primary,
+    color: Colors.dark.primary,
   },
 
   // Empty State
@@ -382,11 +388,11 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyText: {
-    color: '#64748b',
+    color: '#94a3b8',
     marginBottom: 8,
   },
   linkText: {
-    color: Colors.light.primary,
+    color: Colors.dark.primary,
     fontWeight: 'bold',
   },
 
@@ -398,10 +404,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: Colors.light.primary,
+    backgroundColor: Colors.dark.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.light.primary,
+    shadowColor: Colors.dark.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

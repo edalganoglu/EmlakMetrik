@@ -13,14 +13,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors.dark.primary,
         tabBarInactiveTintColor: '#94a3b8', // Slate 400
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: Colors.dark.surface,
           borderTopWidth: 1,
-          borderTopColor: '#e2e8f0', // Slate 200
+          borderTopColor: Colors.dark.border,
           height: Platform.OS === 'ios' ? 88 : 64,
           paddingBottom: Platform.OS === 'ios' ? 28 : 12,
           paddingTop: 8,
@@ -36,14 +36,14 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Panel',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="dashboard" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={24} name="square.grid.2x2.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: 'Geçmiş',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="history" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={24} name="clock.fill" color={color} />,
         }}
       />
       <Tabs.Screen

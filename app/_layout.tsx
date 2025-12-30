@@ -60,7 +60,7 @@ function RootLayoutNav() {
         <Stack.Screen name="wallet" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }

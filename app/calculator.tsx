@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,12 +12,15 @@ export default function CalculatorScreen() {
     const { user } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [creditBalance, setCreditBalance] = useState<number | null>(null);
 
     // Inputs
     const [price, setPrice] = useState('');
     const [rent, setRent] = useState('');
     const [dues, setDues] = useState('');
     const [renovation, setRenovation] = useState('');
+    const [location, setLocation] = useState('');
+    const [address, setAddress] = useState('');
 
     // Financing
     const [useLoan, setUseLoan] = useState(false);
@@ -25,6 +28,24 @@ export default function CalculatorScreen() {
 
     // Results check
     const [results, setResults] = useState<any>(null);
+
+    useEffect(() => {
+        if (user) {
+            fetchBalance();
+        }
+    }, [user]);
+
+    const fetchBalance = async () => {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('credit_balance')
+            .eq('id', user!.id)
+            .single();
+
+        if (data) {
+            setCreditBalance(data.credit_balance);
+        }
+    };
 
     const calculate = () => {
         // Basic calculation logic to match previous flow
@@ -59,13 +80,37 @@ export default function CalculatorScreen() {
 
     const saveAnalysis = async (resultData: any) => {
         if (!user) return;
+
+        if (creditBalance !== null && creditBalance < 1) {
+            Alert.alert('Insufficient Credits', 'You need at least 1 credit to perform an analysis.');
+            return;
+        }
+
         setLoading(true);
 
+        // 1. Deduct Credit via Wallet Transaction
+        const { error: txError } = await supabase.from('wallet_transactions').insert({
+            user_id: user.id,
+            amount: -1,
+            type: 'spend',
+            description: `Analysis for ${address || price}`
+        });
+
+        if (txError) {
+            setLoading(false);
+            Alert.alert('Error', 'Could not process credit deduction.');
+            return;
+        }
+
+        // 2. Save Property
         const { data, error } = await supabase.from('properties').insert({
             user_id: user.id,
-            title: `Property ${price}`, // Simple generated title or ask user later
+            title: address || `Property ${price}`,
+            location: location || 'Unknown Location',
             price: parseFloat(price),
             monthly_rent: parseFloat(rent),
+            status: 'completed',
+            is_unlocked: true, // Auto-unlock for now as we charge 1 credit
             params: {
                 dues: parseFloat(dues),
                 renovation: parseFloat(renovation),
@@ -79,6 +124,9 @@ export default function CalculatorScreen() {
         if (error) {
             Alert.alert('Error', error.message);
         } else {
+            // Update local balance immediately for better UX
+            setCreditBalance((prev) => (prev !== null ? prev - 1 : prev));
+
             if (data && data.length > 0) {
                 router.replace(`/analysis/${data[0].id}`);
             } else {
@@ -94,13 +142,13 @@ export default function CalculatorScreen() {
             <SafeAreaView style={styles.safeArea} edges={['top']}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-                        <MaterialIcons name="arrow-back" size={24} color="#0f172a" />
+                        <MaterialIcons name="arrow-back" size={24} color={Colors.dark.text} />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>New Analysis</Text>
                     <TouchableOpacity onPress={() => {
-                        setPrice(''); setRent(''); setDues(''); setRenovation('');
+                        setPrice(''); setRent(''); setDues(''); setRenovation(''); setLocation(''); setAddress('');
                     }} style={styles.iconButton}>
-                        <MaterialIcons name="refresh" size={24} color={Colors.light.primary} />
+                        <MaterialIcons name="refresh" size={24} color={Colors.dark.primary} />
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -111,10 +159,10 @@ export default function CalculatorScreen() {
                 <View style={styles.creditCard}>
                     <View style={styles.creditInfo}>
                         <View style={styles.creditIcon}>
-                            <MaterialIcons name="token" size={24} color={Colors.light.primary} />
+                            <MaterialIcons name="token" size={24} color={Colors.dark.primary} />
                         </View>
                         <View>
-                            <Text style={styles.creditTitle}>5 Credits Remaining</Text>
+                            <Text style={styles.creditTitle}>{creditBalance !== null ? creditBalance : '...'} Credits Remaining</Text>
                             <Text style={styles.creditSubtitle}>Standard Plan</Text>
                         </View>
                     </View>
@@ -140,7 +188,40 @@ export default function CalculatorScreen() {
                                 placeholderTextColor="#94a3b8"
                             />
                             <View style={styles.suffix}>
-                                <MaterialIcons name="currency-lira" size={20} color="#64748b" />
+                                <Text style={{ fontSize: 16, color: '#64748b' }}>₺</Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Location & Address */}
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Şehir / Bölge (Location)</Text>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="e.g. Istanbul, Kadikoy"
+                                value={location}
+                                onChangeText={setLocation}
+                                placeholderTextColor="#94a3b8"
+                            />
+                            <View style={styles.suffix}>
+                                <MaterialIcons name="location-on" size={20} color="#64748b" />
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Adres (Address / Title)</Text>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="e.g. 123 Main St"
+                                value={address}
+                                onChangeText={setAddress}
+                                placeholderTextColor="#94a3b8"
+                            />
+                            <View style={styles.suffix}>
+                                <MaterialIcons name="home" size={20} color="#64748b" />
                             </View>
                         </View>
                     </View>
@@ -158,7 +239,7 @@ export default function CalculatorScreen() {
                                 placeholderTextColor="#94a3b8"
                             />
                             <View style={styles.suffix}>
-                                <MaterialIcons name="currency-lira" size={20} color="#64748b" />
+                                <Text style={{ fontSize: 16, color: '#64748b' }}>₺</Text>
                             </View>
                         </View>
                     </View>
@@ -218,7 +299,7 @@ export default function CalculatorScreen() {
                         </View>
                         <View style={styles.inputWrapper}>
                             <TextInput
-                                style={[styles.input, { backgroundColor: '#f8fafc', color: '#64748b' }]}
+                                style={[styles.input, { backgroundColor: Colors.dark.surface, color: '#94a3b8' }]}
                                 placeholder="Calculated from price"
                                 editable={false}
                                 value={price ? (parseFloat(price) * 0.04).toFixed(0) : ''}
@@ -241,7 +322,7 @@ export default function CalculatorScreen() {
                             <Switch
                                 value={useLoan}
                                 onValueChange={setUseLoan}
-                                trackColor={{ true: Colors.light.primary, false: '#cbd5e1' }}
+                                trackColor={{ true: Colors.dark.primary, false: Colors.dark.border }}
                             />
                             <Text style={styles.switchLabel}>Use Loan</Text>
                         </View>
@@ -262,9 +343,9 @@ export default function CalculatorScreen() {
                                     step={0.01}
                                     value={loanRate}
                                     onValueChange={setLoanRate}
-                                    minimumTrackTintColor={Colors.light.primary}
-                                    maximumTrackTintColor="#cbd5e1"
-                                    thumbTintColor={Colors.light.primary}
+                                    minimumTrackTintColor={Colors.dark.primary}
+                                    maximumTrackTintColor={Colors.dark.border}
+                                    thumbTintColor={Colors.dark.primary}
                                 />
                                 <View style={styles.rateInputWrapper}>
                                     <Text style={styles.rateInputText}>{loanRate.toFixed(2)}</Text>
@@ -299,18 +380,18 @@ export default function CalculatorScreen() {
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.background,
     },
     safeArea: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.background,
         borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
+        borderBottomColor: Colors.dark.border,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 8, // reduced padding since icon buttons have their own padding/size
+        paddingHorizontal: 8,
         paddingVertical: 12,
     },
     iconButton: {
@@ -319,22 +400,21 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 24,
-        // hover effect could go here
     },
     cancelText: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#64748b',
+        color: '#94a3b8',
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#0f172a',
+        color: Colors.dark.text,
     },
     resetText: {
         fontSize: 14,
         fontWeight: '600',
-        color: Colors.light.primary,
+        color: Colors.dark.primary,
     },
     content: {
         paddingBottom: 150,
@@ -344,9 +424,9 @@ const styles = StyleSheet.create({
     creditCard: {
         margin: 16,
         padding: 16,
-        backgroundColor: 'rgba(19, 91, 236, 0.05)',
+        backgroundColor: 'rgba(79, 133, 246, 0.1)', // Dark mode primary opacity
         borderWidth: 1,
-        borderColor: 'rgba(19, 91, 236, 0.1)',
+        borderColor: 'rgba(79, 133, 246, 0.2)',
         borderRadius: 12,
         flexDirection: 'row',
         alignItems: 'center',
@@ -360,27 +440,27 @@ const styles = StyleSheet.create({
     creditIcon: {
         width: 40,
         height: 40,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(19, 91, 236, 0.1)',
+        borderColor: Colors.dark.border,
     },
     creditTitle: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#0f172a',
+        color: Colors.dark.text,
     },
     creditSubtitle: {
         fontSize: 12,
         fontWeight: '500',
-        color: '#64748b',
+        color: '#94a3b8',
     },
     buyButton: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: Colors.dark.border,
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 8,
@@ -388,7 +468,7 @@ const styles = StyleSheet.create({
     buyButtonText: {
         fontSize: 12,
         fontWeight: 'bold',
-        color: '#0f172a',
+        color: Colors.dark.text,
     },
 
     // Sections
@@ -398,7 +478,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#0f172a',
+        color: Colors.dark.text,
         marginBottom: 16,
     },
     inputGroup: {
@@ -407,7 +487,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#475569',
+        color: '#cbd5e1',
         marginBottom: 8,
         marginLeft: 4,
     },
@@ -415,9 +495,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: Colors.dark.border,
         borderRadius: 12,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         overflow: 'hidden',
         height: 56,
     },
@@ -427,21 +507,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         fontSize: 18,
         fontWeight: '500',
-        color: '#0f172a',
+        color: Colors.dark.text,
     },
     suffix: {
         width: 48,
         height: '100%',
-        backgroundColor: '#f8fafc',
+        backgroundColor: Colors.dark.background,
         justifyContent: 'center',
         alignItems: 'center',
         borderLeftWidth: 1,
-        borderLeftColor: '#e2e8f0',
+        borderLeftColor: Colors.dark.border,
     },
 
     divider: {
         height: 1,
-        backgroundColor: '#f1f5f9',
+        backgroundColor: Colors.dark.border,
         marginHorizontal: 16,
     },
 
@@ -453,9 +533,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: Colors.dark.border,
         borderRadius: 12,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         overflow: 'hidden',
         height: 48,
     },
@@ -465,16 +545,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         fontSize: 16,
         fontWeight: '500',
-        color: '#0f172a',
+        color: Colors.dark.text,
     },
     suffixSmall: {
         width: 40,
         height: '100%',
-        backgroundColor: '#f8fafc',
+        backgroundColor: Colors.dark.background,
         justifyContent: 'center',
         alignItems: 'center',
         borderLeftWidth: 1,
-        borderLeftColor: '#e2e8f0',
+        borderLeftColor: Colors.dark.border,
     },
 
     // Badge
@@ -487,7 +567,7 @@ const styles = StyleSheet.create({
         paddingRight: 4,
     },
     badge: {
-        backgroundColor: 'rgba(19, 91, 236, 0.1)',
+        backgroundColor: 'rgba(79, 133, 246, 0.1)',
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 12,
@@ -495,7 +575,7 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 10,
         fontWeight: '600',
-        color: Colors.light.primary,
+        color: Colors.dark.primary,
     },
 
     // Financing
@@ -513,19 +593,19 @@ const styles = StyleSheet.create({
     switchLabel: {
         fontSize: 14,
         fontWeight: '500',
-        color: '#0f172a',
+        color: Colors.dark.text,
     },
     loanCard: {
-        backgroundColor: '#f8fafc', // slate 50
+        backgroundColor: Colors.dark.surface,
         borderWidth: 1,
-        borderColor: '#f1f5f9',
+        borderColor: Colors.dark.border,
         borderRadius: 12,
         padding: 16,
     },
     loanRateValue: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#0f172a',
+        color: Colors.dark.text,
     },
     sliderRow: {
         flexDirection: 'row',
@@ -537,10 +617,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: 80,
         height: 40,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: Colors.dark.border,
         overflow: 'hidden',
     },
     rateInputText: {
@@ -548,16 +628,16 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#0f172a',
+        color: Colors.dark.text,
     },
     rateSuffix: {
         width: 24,
         height: '100%',
-        backgroundColor: '#f1f5f9',
+        backgroundColor: Colors.dark.background,
         justifyContent: 'center',
         alignItems: 'center',
         borderLeftWidth: 1,
-        borderLeftColor: '#e2e8f0',
+        borderLeftColor: Colors.dark.border,
     },
 
     // Footer Button
@@ -569,19 +649,19 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 32,
-        backgroundColor: 'rgba(255,255,255,0.9)',
+        backgroundColor: Colors.dark.background,
         borderTopWidth: 1,
-        borderTopColor: '#f1f5f9',
+        borderTopColor: Colors.dark.border,
     },
     calculateButton: {
-        backgroundColor: Colors.light.primary,
+        backgroundColor: Colors.dark.primary,
         height: 56,
         borderRadius: 100,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         gap: 8,
-        shadowColor: Colors.light.primary,
+        shadowColor: Colors.dark.primary,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
@@ -599,13 +679,6 @@ const styles = StyleSheet.create({
         borderRadius: 4,
     },
     costText: {
-        color: Colors.light.primary, // Actually visually better if white text on translucent bg, but design shows primary text on white bg? 
-        // Wait, design: text-primary bg-white/20. So on blue button, white/20 bg... text should be blue? No, text-primary on a primary button would be invisible. 
-        // Design HTML says: text-primary bg-white/20. Ah, text-primary usually means blue. Blue text on Blue button? 
-        // Let's look at the image. The image shows White text "Calculate Analysis" and a small tag "1 Credit" which has lighter blue background and blue text. 
-        // Wait, if button is blue, and tag has blue text... contrast? 
-        // Let's assume the HTML class `text-primary` on the tag overrides the white text of the button. 
-        // Let's trust the HTML: text-primary (Blue) on bg-white/20 (White 20%). Blue on Light Blue. Readable.
         color: '#fff',
         fontSize: 12,
         fontWeight: '600',

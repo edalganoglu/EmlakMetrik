@@ -1,9 +1,10 @@
+import { Skeleton } from '@/components/Skeleton';
 import { Colors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import Svg, { Circle } from 'react-native-svg';
 
@@ -17,7 +18,18 @@ export default function AnalysisResultScreen() {
 
     useEffect(() => {
         fetchProperty();
+        fetchBalance();
     }, [id]);
+
+    const [balance, setBalance] = useState(0);
+
+    const fetchBalance = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data } = await supabase.from('profiles').select('credit_balance').eq('id', user.id).single();
+            if (data) setBalance(data.credit_balance);
+        }
+    }
 
     const fetchProperty = async () => {
         if (!id) return;
@@ -33,8 +45,32 @@ export default function AnalysisResultScreen() {
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={Colors.light.primary} />
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <Skeleton width={40} height={40} borderRadius={20} />
+                    <Skeleton width={150} height={24} />
+                    <Skeleton width={40} height={40} borderRadius={20} />
+                </View>
+
+                <View style={styles.content}>
+                    <View style={styles.card}>
+                        <Skeleton width={120} height={24} style={{ marginBottom: 16 }} />
+                        <View style={styles.overviewGrid}>
+                            <View>
+                                <Skeleton width={80} height={14} style={{ marginBottom: 4 }} />
+                                <Skeleton width={60} height={24} />
+                            </View>
+                            <View>
+                                <Skeleton width={80} height={14} style={{ marginBottom: 4 }} />
+                                <Skeleton width={60} height={24} />
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.card}>
+                        <Skeleton width="100%" height={200} borderRadius={16} />
+                    </View>
+                </View>
             </View>
         );
     }
@@ -48,26 +84,35 @@ export default function AnalysisResultScreen() {
     }
 
     // derived values
-    // Using mock logic if params are missing to fill the UI
     const results = property.params?.results || {};
-    const amortization = results.amortization || 18;
-    const roi = results.roi || 5.4;
+    // Use fallback if calculations failed or are missing
+    const amortization = results.amortization || 0;
+    const roi = results.roi || 0;
     const price = property.price || 0;
+    const monthlyRent = property.monthly_rent || 0;
+    const dues = property.params?.dues || 0;
+    // Calculate simple tax (mock) or other expenses for the donut chart
+    const tax = price * 0.002; // Mock annual tax
+    const maintenance = monthlyRent * 0.1 * 12; // Mock maintenance annual
+    const annualDues = dues * 12;
+    const totalAnnualExpense = tax + annualDues + maintenance;
 
     // Charts Data
-    // Projection: Start at Price, increase by 5% yearly (mock)
-    const projectionData = [0, 2, 4, 6, 8, 10].map(y => price * Math.pow(1.15, y)); // 15% increase every 2 years for drama
+    // Projection: Start at Price, increase by 5% yearly (mock logic matching the assumption)
+    // If we had real appreciation rate, we'd use that.
+    const projectionData = [0, 2, 4, 6, 8, 10].map(y => price * Math.pow(1.05, y));
+
 
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-                    <MaterialIcons name="arrow-back" size={24} color="#111318" />
+                    <MaterialIcons name="arrow-back" size={24} color={Colors.dark.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Analiz Sonuçları</Text>
                 <TouchableOpacity style={styles.iconButton}>
-                    <MaterialIcons name="share" size={24} color="#111318" />
+                    <MaterialIcons name="share" size={24} color={Colors.dark.text} />
                 </TouchableOpacity>
             </View>
 
@@ -77,7 +122,7 @@ export default function AnalysisResultScreen() {
                     <Text style={styles.balanceLabel}>Mevcut Bakiye</Text>
                     <View style={styles.balanceValueContainer}>
                         <MaterialIcons name="monetization-on" size={18} color="#f59e0b" />
-                        <Text style={styles.balanceValueText}>125 Kredi</Text>
+                        <Text style={styles.balanceValueText}>{balance} Kredi</Text>
                     </View>
                 </View>
                 <TouchableOpacity style={styles.pdfButton}>
@@ -118,29 +163,29 @@ export default function AnalysisResultScreen() {
 
                     <View style={styles.expenseSummaryRow}>
                         <Text style={styles.expenseTitle}>Gider Dağılımı <Text style={styles.periodBadge}>Yıllık</Text></Text>
-                        <Text style={styles.totalExpense}>₺24.5k</Text>
+                        <Text style={styles.totalExpense}>₺{totalAnnualExpense.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Text>
                     </View>
 
                     <View style={styles.expenseDistributionGrid}>
                         <View style={styles.expenseItem}>
                             <View style={[styles.dot, { backgroundColor: '#135bec' }]} />
                             <View>
-                                <Text style={styles.expenseName}>Vergi</Text>
-                                <Text style={styles.expensePercent}>%30</Text>
+                                <Text style={styles.expenseName}>Vergi (Est)</Text>
+                                <Text style={styles.expensePercent}>{totalAnnualExpense > 0 ? ((tax / totalAnnualExpense) * 100).toFixed(0) : 0}%</Text>
                             </View>
                         </View>
                         <View style={styles.expenseItem}>
                             <View style={[styles.dot, { backgroundColor: '#60a5fa' }]} />
                             <View>
                                 <Text style={styles.expenseName}>Aidat</Text>
-                                <Text style={styles.expensePercent}>%45</Text>
+                                <Text style={styles.expensePercent}>{totalAnnualExpense > 0 ? ((annualDues / totalAnnualExpense) * 100).toFixed(0) : 0}%</Text>
                             </View>
                         </View>
                         <View style={styles.expenseItem}>
                             <View style={[styles.dot, { backgroundColor: '#93c5fd' }]} />
                             <View>
                                 <Text style={styles.expenseName}>Bakım</Text>
-                                <Text style={styles.expensePercent}>%25</Text>
+                                <Text style={styles.expensePercent}>{totalAnnualExpense > 0 ? ((maintenance / totalAnnualExpense) * 100).toFixed(0) : 0}%</Text>
                             </View>
                         </View>
                     </View>
@@ -155,7 +200,7 @@ export default function AnalysisResultScreen() {
                     <View style={styles.chartContainer}>
                         <Svg width={200} height={200} viewBox="0 0 100 100">
                             {/* Background Circle */}
-                            <Circle cx="50" cy="50" r="40" stroke="#f3f4f6" strokeWidth="12" fill="transparent" />
+                            <Circle cx="50" cy="50" r="40" stroke={Colors.dark.border} strokeWidth="12" fill="transparent" />
                             {/* Segments (Mocked using strokeDasharray) */}
                             {/* Blue Segment */}
                             <Circle
@@ -178,7 +223,7 @@ export default function AnalysisResultScreen() {
                         </Svg>
                         <View style={styles.donutLabel}>
                             <Text style={styles.donutLabelTitle}>Toplam</Text>
-                            <Text style={styles.donutLabelValue}>₺24.5k</Text>
+                            <Text style={styles.donutLabelValue}>{(totalAnnualExpense / 1000).toFixed(1)}k</Text>
                         </View>
                     </View>
                 </View>
@@ -203,18 +248,18 @@ export default function AnalysisResultScreen() {
                         withVerticalLines={false}
                         withHorizontalLabels={false}
                         chartConfig={{
-                            backgroundColor: '#fff',
-                            backgroundGradientFrom: '#fff',
-                            backgroundGradientTo: '#fff',
+                            backgroundColor: Colors.dark.surface,
+                            backgroundGradientFrom: Colors.dark.surface,
+                            backgroundGradientTo: Colors.dark.surface,
                             decimalPlaces: 0,
-                            color: (opacity = 1) => `rgba(19, 91, 236, ${opacity})`,
-                            labelColor: (opacity = 1) => `rgba(100, 116, 139, ${opacity})`,
+                            color: (opacity = 1) => `rgba(79, 133, 246, ${opacity})`,
+                            labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
                             style: {
                                 borderRadius: 16
                             },
                             propsForBackgroundLines: {
                                 strokeDasharray: "", // solid lines
-                                stroke: "#f1f5f9"
+                                stroke: Colors.dark.border
                             }
                         }}
                         bezier
@@ -226,7 +271,7 @@ export default function AnalysisResultScreen() {
                     {/* Mock Tooltip overlay to match design "8.2M" tag */}
                     <View style={styles.chartTooltip}>
                         <Text style={styles.chartTooltipText}>
-                            ₺{(projectionData[projectionData.length - 1] / 1000000).toFixed(1)}M
+                            ₺{(projectionData[projectionData.length - 1] / 1000000).toFixed(2)}M
                         </Text>
                         <View style={styles.chartTooltipArrow} />
                     </View>
@@ -243,7 +288,7 @@ export default function AnalysisResultScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f6f6f8',
+        backgroundColor: Colors.dark.background,
     },
     loadingContainer: {
         flex: 1,
@@ -257,7 +302,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 50, // Safe area approx
         paddingBottom: 16,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.background,
     },
     iconButton: {
         width: 40,
@@ -265,21 +310,21 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f6f6f8', // Hover effect mock
+        backgroundColor: Colors.dark.surface,
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
     },
 
     // Sticky Bar
     stickyBar: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         paddingHorizontal: 16,
         paddingBottom: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
+        borderBottomColor: Colors.dark.border,
         zIndex: 10,
     },
     balanceRow: {
@@ -290,7 +335,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
     },
     balanceLabel: {
-        color: '#64748b',
+        color: '#94a3b8',
         fontSize: 14,
         fontWeight: '500',
     },
@@ -302,17 +347,17 @@ const styles = StyleSheet.create({
     balanceValueText: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
     },
     pdfButton: {
-        backgroundColor: Colors.light.primary,
+        backgroundColor: Colors.dark.primary,
         height: 56,
         borderRadius: 12,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 12,
-        shadowColor: Colors.light.primary,
+        shadowColor: Colors.dark.primary,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
@@ -344,24 +389,26 @@ const styles = StyleSheet.create({
         gap: 20,
     },
     card: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         borderRadius: 12,
         padding: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 2,
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
     },
     cardTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
         marginBottom: 8,
     },
     cardSubtitle: {
         fontSize: 14,
-        color: '#64748b',
+        color: '#94a3b8',
     },
     overviewGrid: {
         flexDirection: 'row',
@@ -370,13 +417,13 @@ const styles = StyleSheet.create({
     },
     overviewLabel: {
         fontSize: 14,
-        color: '#64748b',
+        color: '#94a3b8',
         marginBottom: 4,
     },
     overviewValue: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
     },
     trendBadge: {
         flexDirection: 'row',
@@ -391,7 +438,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: '#f1f5f9',
+        backgroundColor: Colors.dark.border,
         marginVertical: 16,
     },
     expenseSummaryRow: {
@@ -403,18 +450,18 @@ const styles = StyleSheet.create({
     expenseTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#334155',
+        color: '#cbd5e1',
     },
     periodBadge: {
         fontSize: 12,
         fontWeight: '500',
-        color: '#475569',
-        backgroundColor: '#f1f5f9',
+        color: '#cbd5e1',
+        backgroundColor: Colors.dark.background,
     },
     totalExpense: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
     },
     expenseDistributionGrid: {
         flexDirection: 'row',
@@ -435,11 +482,11 @@ const styles = StyleSheet.create({
     expenseName: {
         fontSize: 14,
         fontWeight: '500',
-        color: '#334155',
+        color: '#cbd5e1',
     },
     expensePercent: {
         fontSize: 12,
-        color: '#64748b',
+        color: '#94a3b8',
     },
 
     // Donut
@@ -452,8 +499,8 @@ const styles = StyleSheet.create({
     periodBadgeInline: {
         fontSize: 12,
         fontWeight: '500',
-        color: '#475569',
-        backgroundColor: '#f1f5f9',
+        color: '#cbd5e1',
+        backgroundColor: Colors.dark.background,
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 4,
@@ -470,13 +517,13 @@ const styles = StyleSheet.create({
     },
     donutLabelTitle: {
         fontSize: 12,
-        color: '#64748b',
+        color: '#94a3b8',
         fontWeight: '500',
     },
     donutLabelValue: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#111318',
+        color: Colors.dark.text,
     },
 
     // Line Chart
@@ -487,14 +534,16 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 60,
         right: 10,
-        backgroundColor: '#111318',
+        backgroundColor: Colors.dark.background,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
     },
     chartTooltipText: {
-        color: '#fff',
+        color: Colors.dark.text,
         fontSize: 12,
         fontWeight: 'bold',
     },
@@ -506,7 +555,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 5,
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
-        borderTopColor: '#111318',
+        borderTopColor: Colors.dark.background,
         position: 'absolute',
         bottom: -5,
     },

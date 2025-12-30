@@ -56,20 +56,20 @@ export default function LoginScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
         >
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
             <ScrollView contentContainerStyle={styles.scrollContent}>
 
                 {/* Header Logo Area */}
                 <View style={styles.headerContainer}>
                     <View style={styles.logoRow}>
-                        <MaterialIcons name="apartment" size={24} color={Colors.light.primary} />
+                        <MaterialIcons name="apartment" size={24} color={Colors.dark.primary} />
                         <Text style={styles.logoText}>EmlakMetrik</Text>
                     </View>
                     <Text style={styles.heroTitle}>Estimate with Confidence</Text>
                     <Text style={styles.heroSubtitle}>Track costs and manage your credits efficiently.</Text>
 
                     <View style={styles.promoBadge}>
-                        <MaterialIcons name="verified" size={16} color={Colors.light.primary} />
+                        <MaterialIcons name="verified" size={16} color={Colors.dark.primary} />
                         <Text style={styles.promoText}>Sign up to get 5 free credits</Text>
                     </View>
                 </View>
@@ -95,11 +95,11 @@ export default function LoginScreen() {
 
                     <Text style={styles.label}>Email Address</Text>
                     <View style={styles.inputWrapper}>
-                        <MaterialIcons name="email" size={20} color={Colors.light.icon} style={styles.inputIcon} />
+                        <MaterialIcons name="email" size={20} color="#94a3b8" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="name@example.com"
-                            placeholderTextColor={Colors.light.icon}
+                            placeholderTextColor="#64748b"
                             value={email}
                             onChangeText={setEmail}
                             autoCapitalize="none"
@@ -116,17 +116,17 @@ export default function LoginScreen() {
                         )}
                     </View>
                     <View style={styles.inputWrapper}>
-                        <MaterialIcons name="lock" size={20} color={Colors.light.icon} style={styles.inputIcon} />
+                        <MaterialIcons name="lock" size={20} color="#94a3b8" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Enter your password"
-                            placeholderTextColor={Colors.light.icon}
+                            placeholderTextColor="#64748b"
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={!showPassword}
                         />
                         <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                            <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={20} color={Colors.light.icon} />
+                            <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={20} color="#94a3b8" />
                         </TouchableOpacity>
                     </View>
 
@@ -152,7 +152,7 @@ export default function LoginScreen() {
                 {/* Social Buttons */}
                 <View style={styles.socialContainer}>
                     <TouchableOpacity style={styles.socialButton}>
-                        <FontAwesome name="apple" size={20} color="black" />
+                        <FontAwesome name="apple" size={20} color={Colors.dark.text} />
                         <Text style={styles.socialButtonText}>Apple</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.socialButton}>
@@ -180,7 +180,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F9FA', // Light gray background
+        backgroundColor: Colors.dark.background,
     },
     scrollContent: {
         flexGrow: 1,
@@ -200,41 +200,43 @@ const styles = StyleSheet.create({
     logoText: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#111',
+        color: Colors.dark.text,
     },
     heroTitle: {
         fontSize: 32,
         fontWeight: 'bold',
-        color: '#111',
+        color: Colors.dark.text,
         textAlign: 'center',
         marginBottom: 8,
     },
     heroSubtitle: {
         fontSize: 16,
-        color: Colors.light.icon,
+        color: '#94a3b8',
         textAlign: 'center',
         marginBottom: 24,
     },
     promoBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#E0E7FF', // Light indigo
+        backgroundColor: 'rgba(79, 133, 246, 0.1)',
         paddingVertical: 6,
         paddingHorizontal: 12,
         borderRadius: 20,
         gap: 6,
     },
     promoText: {
-        color: Colors.light.primary,
+        color: Colors.dark.primary,
         fontWeight: '600',
         fontSize: 14,
     },
     tabContainer: {
         flexDirection: 'row',
-        backgroundColor: '#E9ECEF',
+        backgroundColor: Colors.dark.surface,
         borderRadius: 12,
         padding: 4,
         marginBottom: 24,
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
     },
     tab: {
         flex: 1,
@@ -243,20 +245,20 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     activeTab: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.card,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.2,
         shadowRadius: 2,
         elevation: 2,
     },
     tabText: {
         fontSize: 14,
         fontWeight: '600',
-        color: Colors.light.icon,
+        color: '#94a3b8',
     },
     activeTabText: {
-        color: '#111',
+        color: Colors.dark.text,
     },
     formContainer: {
         marginBottom: 24,
@@ -264,15 +266,15 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#111',
+        color: Colors.dark.text,
         marginBottom: 8,
     },
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         borderWidth: 1,
-        borderColor: '#E9ECEF',
+        borderColor: Colors.dark.border,
         borderRadius: 12,
         paddingHorizontal: 12,
         height: 50,
@@ -284,7 +286,7 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         fontSize: 16,
-        color: '#111',
+        color: Colors.dark.text,
         height: '100%',
     },
     eyeIcon: {
@@ -297,20 +299,20 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     forgotText: {
-        color: Colors.light.primary,
+        color: Colors.dark.primary,
         fontSize: 14,
         fontWeight: '600',
     },
     mainButton: {
-        backgroundColor: Colors.light.primary,
+        backgroundColor: Colors.dark.primary,
         height: 50,
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 8,
-        shadowColor: Colors.light.primary,
+        shadowColor: Colors.dark.primary,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 4,
     },
@@ -327,11 +329,11 @@ const styles = StyleSheet.create({
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: '#E9ECEF',
+        backgroundColor: Colors.dark.border,
     },
     dividerText: {
         marginHorizontal: 16,
-        color: Colors.light.icon,
+        color: '#94a3b8',
         fontSize: 14,
     },
     socialContainer: {
@@ -344,23 +346,23 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.dark.surface,
         borderWidth: 1,
-        borderColor: '#E9ECEF',
+        borderColor: Colors.dark.border,
         height: 50,
         borderRadius: 12,
         gap: 8,
     },
     socialButtonText: {
         fontWeight: '600',
-        color: '#111',
+        color: Colors.dark.text,
         fontSize: 14,
     },
     footer: {
         alignItems: 'center',
     },
     footerText: {
-        color: Colors.light.icon,
+        color: '#94a3b8',
         fontSize: 12,
         textAlign: 'center',
     },
@@ -369,7 +371,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     footerLink: {
-        color: Colors.light.icon,
+        color: '#94a3b8', // keeping subtle
         fontSize: 12,
         fontWeight: '600',
     },

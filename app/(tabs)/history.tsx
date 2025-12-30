@@ -1,32 +1,14 @@
+import { Skeleton } from '@/components/Skeleton';
 import { Colors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Mock data items for design matching when backend is empty
-const MOCK_ITEMS = [
-  {
-    id: 'mock-1',
-    title: '123 Maple Ave',
-    price: '12500',
-    location: 'Springfield',
-    status: 'completed',
-    date: 'Today, 10:30 AM',
-    tag: 'Renovation'
-  },
-  {
-    id: 'mock-2',
-    title: '404 Ocean Dr',
-    price: null,
-    location: 'Miami',
-    status: 'draft',
-    date: 'Yesterday, 4:15 PM',
-    tag: 'Repairs'
-  },
-];
+// Mock items removed, we are using real data now.
+
 
 export default function HistoryScreen() {
   const router = useRouter();
@@ -51,7 +33,9 @@ export default function HistoryScreen() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (data) setProperties(data);
+      if (data) {
+        setProperties(data);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -59,40 +43,57 @@ export default function HistoryScreen() {
     }
   };
 
-  const renderItem = (item: any, isMock = false) => {
-    // Simple logic to determine status/style based on data
-    // For real data: check if 'results' field is populated -> Completed, else Draft
-    const isDraft = isMock ? item.status === 'draft' : (!item.params?.results);
-    const title = item.title || 'Untitled Analysis';
-    const priceFormatted = item.price
-      ? `$${Number(item.price).toLocaleString()}`
-      : (isMock && item.status === 'draft' ? '--' : '$0');
+  const getFilteredProperties = () => {
+    let filtered = properties;
 
-    // Date formatting
-    const dateStr = isMock ? item.date : new Date(item.created_at).toLocaleDateString();
+    // Apply search filter
+    if (search) {
+      const lowerCaseSearch = search.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.title?.toLowerCase().includes(lowerCaseSearch) ||
+        p.address?.toLowerCase().includes(lowerCaseSearch) ||
+        p.location?.toLowerCase().includes(lowerCaseSearch) ||
+        p.tag?.toLowerCase().includes(lowerCaseSearch)
+      );
+    }
+
+    // Apply status filter
+    if (filter === 'All') return filtered;
+    if (filter === 'Completed') return filtered.filter(p => p.status === 'completed');
+    if (filter === 'Drafts') return filtered.filter(p => p.status === 'draft');
+    if (filter === 'Paid') return filtered.filter(p => p.is_unlocked);
+    return filtered;
+  };
+
+  const renderItem = (item: any) => {
+    const isDraft = item.status === 'draft';
+    const title = item.title || item.address || 'Untitled Analysis'; // Fallback to address or default
+    const priceFormatted = item.price
+      ? `₺${Number(item.price).toLocaleString()}`
+      : '₺0';
+
+    const dateStr = new Date(item.created_at).toLocaleDateString();
 
     // Icon background style
     let iconBg: any = styles.iconBgBlue;
     let iconName: any = "location-on";
-    let iconColor = Colors.light.primary;
+    let iconColor = '#60a5fa'; // blue 400
 
     if (isDraft) {
       iconBg = styles.iconBgAmber;
       iconName = "edit-note";
-      iconColor = "#d97706"; // amber-600
-    } else {
-      // Maybe add logic for 'unlocked' or 'paid' later
-      iconBg = styles.iconBgBlue;
+      iconColor = "#fbbf24"; // amber 400
+    } else if (item.is_unlocked) {
+      iconBg = styles.iconBgPurple;
+      iconName = "verified";
+      iconColor = "#c084fc"; // purple 400
     }
 
     return (
       <TouchableOpacity
         key={item.id}
         style={styles.card}
-        onPress={() => {
-          // Navigate only if it's a real item or we handle mocks properly
-          if (!isMock) router.push(`/analysis/${item.id}`);
-        }}
+        onPress={() => router.push(`/analysis/${item.id}`)}
       >
         {/* Thumbnail Icon */}
         <View style={[styles.thumbnail, iconBg]}>
@@ -108,7 +109,7 @@ export default function HistoryScreen() {
           <View style={[styles.rowBetween, { alignItems: 'flex-end', marginTop: 4 }]}>
             <View>
               <Text style={styles.cardSubtitle} numberOfLines={1}>
-                {isMock ? `${item.location} • ${item.tag}` : `Location • Analysis`}
+                {item.location || 'Unknown Location'} • {item.tag || 'Analysis'}
               </Text>
               <Text style={styles.cardDate}>{dateStr}</Text>
             </View>
@@ -116,6 +117,11 @@ export default function HistoryScreen() {
             {isDraft ? (
               <View style={styles.badgeDraft}>
                 <Text style={styles.badgeTextDraft}>DRAFT</Text>
+              </View>
+            ) : item.is_unlocked ? (
+              <View style={styles.badgeUnlocked}>
+                <MaterialIcons name="lock-open" size={12} color="#c084fc" style={{ marginRight: 2 }} />
+                <Text style={styles.badgeTextUnlocked}>UNLOCKED</Text>
               </View>
             ) : (
               <View style={styles.badgeCompleted}>
@@ -135,7 +141,7 @@ export default function HistoryScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Analysis History</Text>
         <TouchableOpacity style={styles.filterButton}>
-          <MaterialIcons name="filter-list" size={24} color="#475569" />
+          <MaterialIcons name="filter-list" size={24} color="#94a3b8" />
         </TouchableOpacity>
       </View>
 
@@ -146,7 +152,7 @@ export default function HistoryScreen() {
           <TextInput
             style={styles.searchInput}
             placeholder="Search address, city, or analysis..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor="#64748b"
             value={search}
             onChangeText={setSearch}
           />
@@ -175,46 +181,33 @@ export default function HistoryScreen() {
       <ScrollView contentContainerStyle={styles.listContent}>
         {/* Section: This Week */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>THIS WEEK</Text>
+          <Text style={styles.sectionTitle}>ALL ANALYSES</Text>
         </View>
 
-        {/* Combine Mock items and Real items for display purposes if real items are empty to show design */}
-        {/* In production, remove MOCK_ITEMS or only show if user has no data */}
-        {MOCK_ITEMS.map(item => renderItem(item, true))}
-        {properties.map(item => renderItem(item))}
-
-        {/* Section: October 2023 (Static Mock Example) */}
-        <View style={[styles.sectionHeader, { marginTop: 16 }]}>
-          <Text style={styles.sectionTitle}>OCTOBER 2023</Text>
-        </View>
-
-        {/* Static Mock Item for Month */}
-        <TouchableOpacity style={styles.card}>
-          <View style={[styles.thumbnail, styles.iconBgPurple]}>
-            <MaterialIcons name="verified" size={28} color="#9333ea" />
-          </View>
-          <View style={styles.cardContent}>
-            <View style={styles.rowBetween}>
-              <Text style={styles.cardTitle}>782 Pine Hill Rd</Text>
-              <Text style={styles.cardPrice}>$450,000</Text>
-            </View>
-            <View style={[styles.rowBetween, { alignItems: 'flex-end', marginTop: 4 }]}>
-              <View>
-                <Text style={styles.cardSubtitle}>Austin • Full Build</Text>
-                <Text style={styles.cardDate}>Oct 24, 2023</Text>
+        {loading ? (
+          <View style={{ padding: 20 }}>
+            {[1, 2, 3].map(i => (
+              <View key={i} style={styles.card}>
+                <Skeleton width={56} height={56} borderRadius={12} />
+                <View style={{ flex: 1, gap: 8 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Skeleton width={120} height={16} />
+                    <Skeleton width={60} height={16} />
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Skeleton width={150} height={12} />
+                    <Skeleton width={80} height={20} borderRadius={6} />
+                  </View>
+                </View>
               </View>
-              <View style={styles.badgeUnlocked}>
-                <MaterialIcons name="lock-open" size={12} color="#7e22ce" style={{ marginRight: 2 }} />
-                <Text style={styles.badgeTextUnlocked}>UNLOCKED</Text>
-              </View>
-            </View>
+            ))}
           </View>
-        </TouchableOpacity>
-
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator color={Colors.light.primary} />
+        ) : getFilteredProperties().length === 0 ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <Text style={{ color: '#94a3b8' }}>No analysis found.</Text>
           </View>
+        ) : (
+          getFilteredProperties().map(item => renderItem(item))
         )}
       </ScrollView>
 
@@ -234,7 +227,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f6f6f8',
+    backgroundColor: Colors.dark.background,
   },
   header: {
     flexDirection: 'row',
@@ -242,12 +235,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: 'rgba(246, 246, 248, 0.95)',
+    backgroundColor: Colors.dark.background,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#0f172a',
+    color: Colors.dark.text,
   },
   filterButton: {
     width: 40,
@@ -255,7 +248,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    // hover handled by opacity
   },
 
   // Search
@@ -266,15 +258,12 @@ const styles = StyleSheet.create({
   searchWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.dark.surface,
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 48,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   searchIcon: {
     marginRight: 12,
@@ -283,7 +272,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 14,
-    color: '#0f172a',
+    color: Colors.dark.text,
   },
 
   // Filters
@@ -298,25 +287,25 @@ const styles = StyleSheet.create({
     height: 36,
     paddingHorizontal: 20,
     borderRadius: 18,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.dark.surface,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: Colors.dark.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   chipActive: {
-    backgroundColor: Colors.light.primary,
-    borderColor: Colors.light.primary,
-    shadowColor: Colors.light.primary,
+    backgroundColor: Colors.dark.primary,
+    borderColor: Colors.dark.primary,
+    shadowColor: Colors.dark.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
   chipText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#475569',
+    color: '#94a3b8',
   },
   chipTextActive: {
     color: '#fff',
@@ -331,19 +320,19 @@ const styles = StyleSheet.create({
   sectionHeader: {
     paddingVertical: 12,
     marginTop: 8,
-    backgroundColor: '#f6f6f8', // sticky feel
+    backgroundColor: Colors.dark.background, // sticky feel
   },
   sectionTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#64748b',
+    color: '#94a3b8',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
 
   // Card
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.dark.surface,
     borderRadius: 16,
     padding: 12,
     marginBottom: 12,
@@ -351,10 +340,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     borderWidth: 1,
-    borderColor: '#f1f5f9',
+    borderColor: Colors.dark.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 1,
   },
@@ -366,13 +355,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconBgBlue: {
-    backgroundColor: '#dbeafe', // blue 100
+    backgroundColor: 'rgba(59, 130, 246, 0.2)', // blue 500 20%
   },
   iconBgAmber: {
-    backgroundColor: '#fef3c7', // amber 100
+    backgroundColor: 'rgba(245, 158, 11, 0.2)', // amber 500 20%
   },
   iconBgPurple: {
-    backgroundColor: '#f3e8ff', // purple 100
+    backgroundColor: 'rgba(168, 85, 247, 0.2)', // purple 500 20%
   },
   cardContent: {
     flex: 1,
@@ -385,14 +374,14 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#0f172a',
+    color: Colors.dark.text,
     flex: 1,
     marginRight: 8,
   },
   cardPrice: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.light.primary,
+    color: '#4ade80', // green 400
   },
   cardPriceDraft: {
     fontSize: 16,
@@ -402,55 +391,55 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#64748b',
+    color: '#94a3b8',
   },
   cardDate: {
     fontSize: 11,
-    color: '#94a3b8',
+    color: '#64748b',
     marginTop: 2,
   },
 
   // Badges
   badgeCompleted: {
-    backgroundColor: '#f0fdf4', // green 50
+    backgroundColor: 'rgba(34, 197, 94, 0.15)', // green 500 15%
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#dcfce7',
+    borderColor: 'rgba(34, 197, 94, 0.3)',
   },
   badgeTextCompleted: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#15803d', // green 700
+    color: '#4ade80', // green 400
   },
   badgeDraft: {
-    backgroundColor: '#fffbeb', // amber 50
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#fef3c7',
+    borderColor: 'rgba(245, 158, 11, 0.3)',
   },
   badgeTextDraft: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#b45309', // amber 700
+    color: '#fbbf24', // amber 400
   },
   badgeUnlocked: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#faf5ff', // purple 50
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#f3e8ff',
+    borderColor: 'rgba(168, 85, 247, 0.3)',
   },
   badgeTextUnlocked: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#7e22ce', // purple 700
+    color: '#c084fc', // purple 400
   },
 
   loadingContainer: {
@@ -466,10 +455,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: Colors.light.primary,
+    backgroundColor: Colors.dark.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.light.primary,
+    shadowColor: Colors.dark.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
