@@ -42,14 +42,14 @@ export default function LoginScreen() {
                     },
                 },
             });
-            if (error) Alert.alert('Error', error.message);
-            else Alert.alert('Success', 'Please check your email for verification!');
+            if (error) Alert.alert('Hata', error.message);
+            else Alert.alert('Başarılı', 'Lütfen doğrulama için e-postanızı kontrol edin!');
         } else {
             const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
-            if (error) Alert.alert('Error', error.message);
+            if (error) Alert.alert('Hata', error.message);
         }
         setLoading(false);
     }
@@ -68,12 +68,12 @@ export default function LoginScreen() {
                         <MaterialIcons name="apartment" size={24} color={Colors.dark.primary} />
                         <Text style={styles.logoText}>EmlakMetrik</Text>
                     </View>
-                    <Text style={styles.heroTitle}>Estimate with Confidence</Text>
-                    <Text style={styles.heroSubtitle}>Track costs and manage your credits efficiently.</Text>
+                    <Text style={styles.heroTitle}>Güvenle Analiz Edin</Text>
+                    <Text style={styles.heroSubtitle}>Maliyetleri takip edin ve kredilerinizi verimli yönetin.</Text>
 
                     <View style={styles.promoBadge}>
                         <MaterialIcons name="verified" size={16} color={Colors.dark.primary} />
-                        <Text style={styles.promoText}>Sign up to get 5 free credits</Text>
+                        <Text style={styles.promoText}>Kayıt olun ve 5 ücretsiz kredi kazanın</Text>
                     </View>
                 </View>
 
@@ -83,20 +83,20 @@ export default function LoginScreen() {
                         style={[styles.tab, activeTab === 'login' && styles.activeTab]}
                         onPress={() => setActiveTab('login')}
                     >
-                        <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Log In</Text>
+                        <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Giriş Yap</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.tab, activeTab === 'signup' && styles.activeTab]}
                         onPress={() => setActiveTab('signup')}
                     >
-                        <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
+                        <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Kayıt Ol</Text>
                     </TouchableOpacity>
                 </View>
 
                 {/* Form */}
                 <View style={styles.formContainer}>
 
-                    <Text style={styles.label}>Email Address</Text>
+                    <Text style={styles.label}>E-posta Adresi</Text>
                     <View style={styles.inputWrapper}>
                         <MaterialIcons name="email" size={20} color="#94a3b8" style={styles.inputIcon} />
                         <TextInput
@@ -111,10 +111,10 @@ export default function LoginScreen() {
                     </View>
 
                     <View style={styles.passwordHeader}>
-                        <Text style={styles.label}>Password</Text>
+                        <Text style={styles.label}>Şifre</Text>
                         {activeTab === 'login' && (
                             <TouchableOpacity>
-                                <Text style={styles.forgotText}>Forgot?</Text>
+                                <Text style={styles.forgotText}>Şifremi Unuttum</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -122,7 +122,7 @@ export default function LoginScreen() {
                         <MaterialIcons name="lock" size={20} color="#94a3b8" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
-                            placeholder="Enter your password"
+                            placeholder="Şifrenizi girin"
                             placeholderTextColor="#64748b"
                             value={password}
                             onChangeText={setPassword}
@@ -141,14 +141,14 @@ export default function LoginScreen() {
                         {loading ? (
                             <ActivityIndicator color="#fff" />
                         ) : (
-                            <Text style={styles.mainButtonText}>{activeTab === 'login' ? 'Log In' : 'Sign Up'}</Text>
+                            <Text style={styles.mainButtonText}>{activeTab === 'login' ? 'Giriş Yap' : 'Kayıt Ol'}</Text>
                         )}
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.dividerContainer}>
                     <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>Or continue with</Text>
+                    <Text style={styles.dividerText}>veya şunlarla devam edin</Text>
                     <View style={styles.dividerLine} />
                 </View>
 
@@ -166,12 +166,12 @@ export default function LoginScreen() {
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>
-                        By continuing, you agree to EmlakMetrik's
+                        Devam ederek EmlakMetrik'in şu koşullarını kabul etmiş olursunuz:
                     </Text>
                     <View style={styles.footerLinks}>
-                        <Text style={styles.footerLink}>Terms of Service</Text>
+                        <Text style={styles.footerLink}>Kullanım Koşulları</Text>
                         <Text style={styles.footerText}> • </Text>
-                        <Text style={styles.footerLink}>Privacy Policy</Text>
+                        <Text style={styles.footerLink}>Gizlilik Politikası</Text>
                     </View>
                 </View>
 

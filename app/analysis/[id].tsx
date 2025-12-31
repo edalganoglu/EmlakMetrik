@@ -837,6 +837,16 @@ export default function AnalysisResultScreen() {
             } else {
                 await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
             }
+
+            // Mark as PDF generated in database
+            await supabase
+                .from('properties')
+                .update({
+                    pdf_generated: true,
+                    pdf_generated_at: new Date().toISOString()
+                })
+                .eq('id', id);
+
         } catch (error) {
             console.error('PDF Error:', error);
             Alert.alert('Hata', 'PDF oluşturulurken bir sorun oluştu.');

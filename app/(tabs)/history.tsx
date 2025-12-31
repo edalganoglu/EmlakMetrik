@@ -3,12 +3,22 @@ import { Colors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Mock items removed, we are using real data now.
-
+const PAGE_SIZE = 10;
 
 export default function HistoryScreen() {
   const router = useRouter();
@@ -16,31 +26,92 @@ export default function HistoryScreen() {
   const [search, setSearch] = useState('');
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+
+  const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
 
   useEffect(() => {
-    fetchHistory();
+    fetchHistory(0, true);
   }, []);
 
-  const fetchHistory = async () => {
+  const fetchHistory = async (pageNum: number, reset: boolean = false) => {
     try {
-      setLoading(true);
+      if (reset) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase
+      const from = pageNum * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data, error } = await supabase
         .from('properties')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
 
       if (data) {
-        setProperties(data);
+        if (reset) {
+          setProperties(data);
+        } else {
+          setProperties(prev => [...prev, ...data]);
+        }
+        setHasMore(data.length === PAGE_SIZE);
+        setPage(pageNum);
       }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore && !loading) {
+      fetchHistory(page + 1, false);
+    }
+  };
+
+  const deleteAnalysis = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setProperties(prev => prev.filter(p => p.id !== id));
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Hata', 'Analiz silinirken bir hata oluştu.');
+    }
+  };
+
+  const confirmDelete = (item: any) => {
+    Alert.alert(
+      'Analizi Sil',
+      `"${item.title || item.address || 'Bu analizi'}" silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`,
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Sil',
+          style: 'destructive',
+          onPress: () => deleteAnalysis(item.id)
+        }
+      ]
+    );
   };
 
   const getFilteredProperties = () => {
@@ -65,125 +136,195 @@ export default function HistoryScreen() {
     return filtered;
   };
 
-  const renderItem = (item: any) => {
-    const isDraft = item.status === 'draft';
-    const title = item.title || item.address || 'Untitled Analysis'; // Fallback to address or default
+  const renderRightActions = (item: any, progress: Animated.AnimatedInterpolation<number>) => {
+    const scale = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.5, 1],
+    });
+
+    const translateX = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [64, 0],
+    });
+
+    return (
+      <View style={styles.rightActionContainer}>
+        <Animated.View style={[styles.deleteButton, { transform: [{ translateX }, { scale }] }]}>
+          <TouchableOpacity
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}
+            onPress={() => {
+              swipeableRefs.current.get(item.id)?.close();
+              confirmDelete(item);
+            }}
+          >
+            <MaterialIcons name="delete-outline" size={28} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    );
+  };
+
+  const renderItem = ({ item }: { item: any }) => {
+    const title = item.title || item.address || 'İsimsiz Analiz';
     const priceFormatted = item.price
       ? `₺${Number(item.price).toLocaleString()}`
       : '₺0';
 
-    const dateStr = new Date(item.created_at).toLocaleDateString();
+    const dateStr = new Date(item.created_at).toLocaleDateString('tr-TR');
+
+    // Check if analysis is from last 7 days
+    const createdDate = new Date(item.created_at);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const isNew = createdDate > sevenDaysAgo;
+
+    // Check if PDF was generated
+    const hasPdf = item.pdf_generated === true;
 
     // Icon background style
     let iconBg: any = styles.iconBgBlue;
     let iconName: any = "location-on";
     let iconColor = '#60a5fa'; // blue 400
 
-    if (isDraft) {
-      iconBg = styles.iconBgAmber;
-      iconName = "edit-note";
-      iconColor = "#fbbf24"; // amber 400
-    } else if (item.is_unlocked) {
+    if (hasPdf) {
       iconBg = styles.iconBgPurple;
-      iconName = "verified";
+      iconName = "picture-as-pdf";
       iconColor = "#c084fc"; // purple 400
+    } else if (isNew) {
+      iconBg = styles.iconBgGreen;
+      iconName = "fiber-new";
+      iconColor = "#4ade80"; // green 400
     }
 
     return (
-      <TouchableOpacity
-        key={item.id}
-        style={styles.card}
-        onPress={() => router.push(`/analysis/${item.id}`)}
-      >
-        {/* Thumbnail Icon */}
-        <View style={[styles.thumbnail, iconBg]}>
-          <MaterialIcons name={iconName} size={28} color={iconColor} />
-        </View>
-
-        <View style={styles.cardContent}>
-          <View style={styles.rowBetween}>
-            <Text style={styles.cardTitle} numberOfLines={1}>{title}</Text>
-            <Text style={isDraft ? styles.cardPriceDraft : styles.cardPrice}>{priceFormatted}</Text>
-          </View>
-
-          <View style={[styles.rowBetween, { alignItems: 'flex-end', marginTop: 4 }]}>
-            <View>
-              <Text style={styles.cardSubtitle} numberOfLines={1}>
-                {item.location || 'Unknown Location'} • {item.tag || 'Analysis'}
-              </Text>
-              <Text style={styles.cardDate}>{dateStr}</Text>
+      <View style={styles.cardContainer}>
+        <Swipeable
+          ref={(ref) => {
+            if (ref) swipeableRefs.current.set(item.id, ref);
+          }}
+          renderRightActions={(progress) => renderRightActions(item, progress)}
+          overshootRight={false}
+          friction={1.5}
+          containerStyle={{ borderRadius: 16, overflow: 'hidden' }}
+        >
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.9}
+            onPress={() => router.push(`/analysis/${item.id}`)}
+          >
+            {/* Thumbnail Icon */}
+            <View style={[styles.thumbnail, iconBg]}>
+              <MaterialIcons name={iconName} size={28} color={iconColor} />
             </View>
 
-            {isDraft ? (
-              <View style={styles.badgeDraft}>
-                <Text style={styles.badgeTextDraft}>DRAFT</Text>
+            <View style={styles.cardContent}>
+              <View style={styles.rowBetween}>
+                <Text style={styles.cardTitle} numberOfLines={1}>{title}</Text>
+                <Text style={styles.cardPrice}>{priceFormatted}</Text>
               </View>
-            ) : item.is_unlocked ? (
-              <View style={styles.badgeUnlocked}>
-                <MaterialIcons name="lock-open" size={12} color="#c084fc" style={{ marginRight: 2 }} />
-                <Text style={styles.badgeTextUnlocked}>UNLOCKED</Text>
-              </View>
-            ) : (
-              <View style={styles.badgeCompleted}>
-                <Text style={styles.badgeTextCompleted}>COMPLETED</Text>
-              </View>
-            )}
 
-          </View>
-        </View>
-      </TouchableOpacity>
+              <View style={[styles.rowBetween, { alignItems: 'flex-end', marginTop: 4 }]}>
+                <View>
+                  <Text style={styles.cardSubtitle} numberOfLines={1}>
+                    {item.location || 'Konum Belirtilmemiş'} • {item.tag || 'Analiz'}
+                  </Text>
+                  <Text style={styles.cardDate}>{dateStr}</Text>
+                </View>
+
+                {/* Badges: PDF veya YENİ */}
+                {/* Öncelik sırası: PDF > YENİ */}
+                {hasPdf ? (
+                  <View style={styles.badgePdf}>
+                    <MaterialIcons name="picture-as-pdf" size={12} color="#c084fc" style={{ marginRight: 2 }} />
+                    <Text style={styles.badgeTextPdf}>PDF</Text>
+                  </View>
+                ) : isNew ? (
+                  <View style={styles.badgeNew}>
+                    <Text style={styles.badgeTextNew}>YENİ</Text>
+                  </View>
+                ) : null}
+
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Swipeable>
+      </View>
     );
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Analysis History</Text>
-        <TouchableOpacity style={styles.filterButton}>
-          <MaterialIcons name="filter-list" size={24} color="#94a3b8" />
-        </TouchableOpacity>
+  const renderFooter = () => {
+    if (!loadingMore) return null;
+    return (
+      <View style={styles.loadingFooter}>
+        <ActivityIndicator size="small" color={Colors.dark.primary} />
       </View>
+    );
+  };
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchWrapper}>
-          <MaterialIcons name="search" size={20} color="#94a3b8" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search address, city, or analysis..."
-            placeholderTextColor="#64748b"
-            value={search}
-            onChangeText={setSearch}
+  const renderHeader = () => (
+    <>
+      {/* Section: Tüm Analizler */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>TÜM ANALİZLER</Text>
+      </View>
+    </>
+  );
+
+  const filteredData = getFilteredProperties();
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Analiz Geçmişi</Text>
+          <TouchableOpacity style={styles.filterButton}>
+            <MaterialIcons name="filter-list" size={24} color="#94a3b8" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchWrapper}>
+            <MaterialIcons name="search" size={20} color="#94a3b8" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Adres, şehir veya analiz ara..."
+              placeholderTextColor="#64748b"
+              value={search}
+              onChangeText={setSearch}
+            />
+          </View>
+        </View>
+
+        {/* Filter Chips */}
+        <View style={styles.filtersContainer}>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filtersContent}
+            data={[
+              { value: 'All', label: 'Tümü' },
+              { value: 'Completed', label: 'Tamamlanan' },
+              { value: 'Drafts', label: 'Taslaklar' },
+              { value: 'Paid', label: 'Açılmış' }
+            ]}
+            keyExtractor={(item) => item.value}
+            renderItem={({ item: f }) => {
+              const isActive = filter === f.value;
+              return (
+                <TouchableOpacity
+                  style={[styles.chip, isActive && styles.chipActive]}
+                  onPress={() => setFilter(f.value)}
+                >
+                  <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{f.label}</Text>
+                </TouchableOpacity>
+              );
+            }}
           />
         </View>
-      </View>
 
-      {/* Filter Chips */}
-      <View style={styles.filtersContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersContent}>
-          {['All', 'Completed', 'Drafts', 'Paid'].map((f) => {
-            const isActive = filter === f;
-            return (
-              <TouchableOpacity
-                key={f}
-                style={[styles.chip, isActive && styles.chipActive]}
-                onPress={() => setFilter(f)}
-              >
-                <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{f}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      {/* List */}
-      <ScrollView contentContainerStyle={styles.listContent}>
-        {/* Section: This Week */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>ALL ANALYSES</Text>
-        </View>
-
+        {/* List */}
         {loading ? (
           <View style={{ padding: 20 }}>
             {[1, 2, 3].map(i => (
@@ -202,25 +343,35 @@ export default function HistoryScreen() {
               </View>
             ))}
           </View>
-        ) : getFilteredProperties().length === 0 ? (
-          <View style={{ padding: 20, alignItems: 'center' }}>
-            <Text style={{ color: '#94a3b8' }}>No analysis found.</Text>
-          </View>
         ) : (
-          getFilteredProperties().map(item => renderItem(item))
+          <FlatList
+            data={filteredData}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            ListHeaderComponent={renderHeader}
+            ListEmptyComponent={
+              <View style={{ padding: 20, alignItems: 'center' }}>
+                <Text style={{ color: '#94a3b8' }}>Analiz bulunamadı.</Text>
+              </View>
+            }
+            ListFooterComponent={renderFooter}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            contentContainerStyle={styles.listContent}
+          />
         )}
-      </ScrollView>
 
-      {/* FAB */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => router.push('/calculator')}
-        activeOpacity={0.8}
-      >
-        <MaterialIcons name="add" size={32} color="#fff" />
-      </TouchableOpacity>
+        {/* FAB */}
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => router.push('/calculator')}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons name="add" size={32} color="#fff" />
+        </TouchableOpacity>
 
-    </SafeAreaView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -331,11 +482,13 @@ const styles = StyleSheet.create({
   },
 
   // Card
+  cardContainer: {
+    marginBottom: 12,
+  },
   card: {
     backgroundColor: Colors.dark.surface,
     borderRadius: 16,
     padding: 12,
-    marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
@@ -363,6 +516,9 @@ const styles = StyleSheet.create({
   iconBgPurple: {
     backgroundColor: 'rgba(168, 85, 247, 0.2)', // purple 500 20%
   },
+  iconBgGreen: {
+    backgroundColor: 'rgba(34, 197, 94, 0.2)', // green 500 20%
+  },
   cardContent: {
     flex: 1,
   },
@@ -383,11 +539,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#4ade80', // green 400
   },
-  cardPriceDraft: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#94a3b8',
-  },
   cardSubtitle: {
     fontSize: 12,
     fontWeight: '500',
@@ -399,8 +550,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Badges
-  badgeCompleted: {
+  // Badges - YENİ (son 7 gün)
+  badgeNew: {
     backgroundColor: 'rgba(34, 197, 94, 0.15)', // green 500 15%
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -408,25 +559,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(34, 197, 94, 0.3)',
   },
-  badgeTextCompleted: {
+  badgeTextNew: {
     fontSize: 10,
     fontWeight: 'bold',
     color: '#4ade80', // green 400
   },
-  badgeDraft: {
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-  },
-  badgeTextDraft: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#fbbf24', // amber 400
-  },
-  badgeUnlocked: {
+
+  // PDF badge
+  badgePdf: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(168, 85, 247, 0.15)',
@@ -436,7 +576,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(168, 85, 247, 0.3)',
   },
-  badgeTextUnlocked: {
+  badgeTextPdf: {
     fontSize: 10,
     fontWeight: 'bold',
     color: '#c084fc', // purple 400
@@ -446,6 +586,31 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     alignItems: 'center',
   },
+
+  // Swipe to delete
+  rightActionContainer: {
+    width: 80,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingLeft: 12,
+  },
+  deleteButton: {
+    backgroundColor: '#dc2626',
+    width: 64,  // Kare değil ama dikey dikdörtgen
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+  },
+  // deleteText removed as we use icon only now
+
+  // Loading footer
+  loadingFooter: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+
 
   // FAB
   fab: {
@@ -465,3 +630,4 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 });
+

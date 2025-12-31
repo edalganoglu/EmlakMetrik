@@ -57,7 +57,7 @@ export default function ProfileScreen() {
                 uploadAvatar(result.assets[0].uri);
             }
         } catch (error) {
-            Alert.alert('Error', 'Error picking image');
+            Alert.alert('Hata', 'Fotoğraf seçilirken hata oluştu');
         }
     };
 
@@ -87,10 +87,10 @@ export default function ProfileScreen() {
             if (updateError) throw updateError;
 
             fetchProfile();
-            Alert.alert('Success', 'Profile photo updated!');
+            Alert.alert('Başarılı', 'Profil fotoğrafı güncellendi!');
 
         } catch (error: any) {
-            Alert.alert('Error uploading image', error.message);
+            Alert.alert('Fotoğraf yüklenirken hata', error.message);
         } finally {
             setUploading(false);
         }
@@ -98,7 +98,7 @@ export default function ProfileScreen() {
 
     async function signOut() {
         const { error } = await supabase.auth.signOut();
-        if (error) Alert.alert('Error', error.message);
+        if (error) Alert.alert('Hata', error.message);
     }
 
     async function saveProfile() {
@@ -115,9 +115,9 @@ export default function ProfileScreen() {
         setLoading(false);
 
         if (error) {
-            Alert.alert('Error', error.message);
+            Alert.alert('Hata', error.message);
         } else {
-            Alert.alert('Success', 'Profile updated successfully.');
+            Alert.alert('Başarılı', 'Profil başarıyla güncellendi.');
             fetchProfile(); // refresh data
         }
     }
@@ -127,9 +127,9 @@ export default function ProfileScreen() {
             {/* Header */}
             <View style={styles.header}>
 
-                <Text style={styles.headerTitle}>Profile</Text>
+                <Text style={styles.headerTitle}>Profil</Text>
                 <TouchableOpacity onPress={saveProfile}>
-                    <Text style={styles.saveText}>Save</Text>
+                    <Text style={styles.saveText}>Kaydet</Text>
                 </TouchableOpacity>
             </View>
 
@@ -161,8 +161,8 @@ export default function ProfileScreen() {
                                 </TouchableOpacity>
                             </View>
                             <View style={styles.profileInfo}>
-                                <Text style={styles.profileName}>{fullName || 'User'}</Text>
-                                <Text style={styles.profileRole}>Real Estate Agent</Text>
+                                <Text style={styles.profileName}>{fullName || 'Kullanıcı'}</Text>
+                                <Text style={styles.profileRole}>Emlak Danışmanı</Text>
                             </View>
                         </>
                     )}
@@ -176,27 +176,27 @@ export default function ProfileScreen() {
                             </View>
                         ) : (
                             <View>
-                                <Text style={styles.balanceLabel}>BALANCE</Text>
+                                <Text style={styles.balanceLabel}>BAKİYE</Text>
                                 <Text style={styles.balanceValue}>
-                                    {profile?.credit_balance ?? 0} <Text style={styles.balanceUnit}>credits</Text>
+                                    {profile?.credit_balance ?? 0} <Text style={styles.balanceUnit}>kredi</Text>
                                 </Text>
                             </View>
                         )}
                         <TouchableOpacity style={styles.topUpButton} onPress={() => router.push('/wallet')}>
                             <MaterialIcons name="add-circle" size={20} color="#fff" />
-                            <Text style={styles.topUpText}>Top Up</Text>
+                            <Text style={styles.topUpText}>Yükle</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
 
                 <View style={styles.divider} />
 
-                {/* Personal Information */}
+                {/* Kişisel Bilgiler */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Personal Information</Text>
+                    <Text style={styles.sectionTitle}>Kişisel Bilgiler</Text>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Full Name</Text>
+                        <Text style={styles.label}>Ad Soyad</Text>
                         <View style={styles.inputWrapper}>
                             <TextInput
                                 style={styles.input}
@@ -208,7 +208,7 @@ export default function ProfileScreen() {
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email Address</Text>
+                        <Text style={styles.label}>E-posta Adresi</Text>
                         <View style={styles.inputWrapper}>
                             <TextInput
                                 style={styles.input}
@@ -221,7 +221,7 @@ export default function ProfileScreen() {
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Phone Number</Text>
+                        <Text style={styles.label}>Telefon Numarası</Text>
                         <View style={styles.inputWrapper}>
                             <TextInput
                                 style={styles.input}
@@ -234,19 +234,19 @@ export default function ProfileScreen() {
                     </View>
                 </View>
 
-                {/* Preferences */}
+                {/* Tercihler */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Preferences</Text>
+                    <Text style={styles.sectionTitle}>Tercihler</Text>
                     <View style={styles.preferencesList}>
-                        {/* Notifications */}
+                        {/* Bildirimler */}
                         <TouchableOpacity style={styles.preferenceItem}>
                             <View style={styles.preferenceLeft}>
                                 <View style={styles.preferenceIconBg}>
                                     <MaterialIcons name="notifications" size={24} color={Colors.dark.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.preferenceTitle}>Notifications</Text>
-                                    <Text style={styles.preferenceSubtitle}>Push, Email & SMS</Text>
+                                    <Text style={styles.preferenceTitle}>Bildirimler</Text>
+                                    <Text style={styles.preferenceSubtitle}>Push, E-posta & SMS</Text>
                                 </View>
                             </View>
                             <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
@@ -254,15 +254,15 @@ export default function ProfileScreen() {
 
                         <View style={styles.listDivider} />
 
-                        {/* Payment Methods */}
+                        {/* Ödeme Yöntemleri */}
                         <TouchableOpacity style={styles.preferenceItem}>
                             <View style={styles.preferenceLeft}>
                                 <View style={styles.preferenceIconBg}>
                                     <MaterialIcons name="payments" size={24} color={Colors.dark.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.preferenceTitle}>Payment Methods</Text>
-                                    <Text style={styles.preferenceSubtitle}>Manage cards & billing</Text>
+                                    <Text style={styles.preferenceTitle}>Ödeme Yöntemleri</Text>
+                                    <Text style={styles.preferenceSubtitle}>Kartlar ve faturalama</Text>
                                 </View>
                             </View>
                             <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
@@ -270,15 +270,15 @@ export default function ProfileScreen() {
 
                         <View style={styles.listDivider} />
 
-                        {/* Security */}
+                        {/* Güvenlik */}
                         <TouchableOpacity style={styles.preferenceItem}>
                             <View style={styles.preferenceLeft}>
                                 <View style={styles.preferenceIconBg}>
                                     <MaterialIcons name="lock" size={24} color={Colors.dark.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.preferenceTitle}>Security</Text>
-                                    <Text style={styles.preferenceSubtitle}>Password & 2FA</Text>
+                                    <Text style={styles.preferenceTitle}>Güvenlik</Text>
+                                    <Text style={styles.preferenceSubtitle}>Şifre & 2FA</Text>
                                 </View>
                             </View>
                             <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
@@ -290,9 +290,9 @@ export default function ProfileScreen() {
                 <View style={styles.footer}>
                     <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
                         <MaterialIcons name="logout" size={18} color="#dc2626" />
-                        <Text style={styles.logoutText}>Log Out</Text>
+                        <Text style={styles.logoutText}>Çıkış Yap</Text>
                     </TouchableOpacity>
-                    <Text style={styles.versionText}>Version 2.4.0</Text>
+                    <Text style={styles.versionText}>Sürüm 2.4.0</Text>
                 </View>
 
             </ScrollView>

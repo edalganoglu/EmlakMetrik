@@ -91,53 +91,90 @@ export default function HomeScreen() {
       {/* Recent Analysis Header */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Son Analizler</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/history')}>
           <Text style={styles.seeAllText}>Tümünü Gör</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
-  const renderProperty = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      {/* Image */}
-      <View style={styles.cardImageWrapper}>
-        <Image
-          source={{ uri: 'https://placehold.co/150' }} // Placeholder logic needs improvement later
-          style={styles.cardImage}
-        />
-      </View>
+  const renderProperty = ({ item }: { item: any }) => {
+    const title = item.title || item.address || 'İsimsiz Analiz';
+    const priceFormatted = item.price
+      ? `₺${Number(item.price).toLocaleString()}`
+      : '₺0';
+    const dateStr = new Date(item.created_at).toLocaleDateString('tr-TR');
 
-      {/* Center Content */}
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
-        <Text style={styles.cardSubtitle} numberOfLines={1}>
-          {/* Mocking params for now since we don't have them fully structured */}
-          3+1, 120m² • {new Date(item.created_at).toLocaleDateString()}
-        </Text>
+    // Check if analysis is from last 7 days
+    const createdDate = new Date(item.created_at);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const isNew = createdDate > sevenDaysAgo;
 
-        <View style={styles.statusBadge}>
-          <View style={styles.statusDot} />
-          <Text style={styles.statusText}>TAMAMLANDI</Text>
+    // Check if PDF was generated
+    const hasPdf = item.pdf_generated === true;
+
+    // Icon background style based on status
+    let iconBg = styles.iconBgBlue;
+    let iconName: any = "location-on";
+    let iconColor = '#60a5fa'; // blue 400
+
+    if (hasPdf) {
+      iconBg = styles.iconBgPurple;
+      iconName = "picture-as-pdf";
+      iconColor = "#c084fc"; // purple 400
+    } else if (isNew) {
+      iconBg = styles.iconBgGreen;
+      iconName = "fiber-new";
+      iconColor = "#4ade80"; // green 400
+    }
+
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => router.push(`/analysis/${item.id}`)}
+      >
+        {/* Thumbnail Icon */}
+        <View style={[styles.thumbnail, iconBg]}>
+          <MaterialIcons name={iconName} size={28} color={iconColor} />
         </View>
-      </View>
 
-      {/* Price */}
-      <View style={styles.cardPriceContainer}>
-        <Text style={styles.cardPrice}>
-          {/* Simple formatting for Millions/Thousands */}
-          {Number(item.price) >= 1000000
-            ? `₺${(Number(item.price) / 1000000).toFixed(1)}M`
-            : `₺${(Number(item.price) / 1000).toFixed(0)}K`}
-        </Text>
-      </View>
-    </View>
-  );
+        <View style={styles.cardContent}>
+          <View style={styles.rowBetween}>
+            <Text style={styles.cardTitle} numberOfLines={1}>{title}</Text>
+            <Text style={styles.cardPrice}>{priceFormatted}</Text>
+          </View>
+
+          <View style={[styles.rowBetween, { alignItems: 'flex-end', marginTop: 4 }]}>
+            <View>
+              <Text style={styles.cardSubtitle} numberOfLines={1}>
+                {item.location || 'Konum Belirtilmemiş'} • {item.tag || 'Analiz'}
+              </Text>
+              <Text style={styles.cardDate}>{dateStr}</Text>
+            </View>
+
+            {/* Badges: YENİ veya PDF */}
+            {hasPdf ? (
+              <View style={styles.badgePdf}>
+                <MaterialIcons name="picture-as-pdf" size={12} color="#c084fc" style={{ marginRight: 2 }} />
+                <Text style={styles.badgeTextPdf}>PDF</Text>
+              </View>
+            ) : isNew ? (
+              <View style={styles.badgeNew}>
+                <Text style={styles.badgeTextNew}>YENİ</Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={properties}
+        data={properties.slice(0, 4)}
         keyExtractor={(item) => item.id}
         renderItem={renderProperty}
         ListHeaderComponent={renderHeader}
@@ -312,74 +349,100 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.dark.card,
+    backgroundColor: Colors.dark.surface,
     marginHorizontal: 16,
     marginBottom: 12,
     padding: 12,
     borderRadius: 16,
-    gap: 12,
-    // Add border for dark mode definition
+    gap: 16,
     borderWidth: 1,
     borderColor: Colors.dark.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 1,
   },
-  cardImageWrapper: {
-    width: 64,
-    height: 64,
+  thumbnail: {
+    width: 56,
+    height: 56,
     borderRadius: 12,
-    backgroundColor: Colors.dark.background,
-    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  cardImage: {
-    width: '100%',
-    height: '100%',
-    opacity: 0.8, // Slightly dim images to blend better
+  iconBgBlue: {
+    backgroundColor: 'rgba(59, 130, 246, 0.2)', // blue 500 20%
+  },
+  iconBgAmber: {
+    backgroundColor: 'rgba(245, 158, 11, 0.2)', // amber 500 20%
+  },
+  iconBgPurple: {
+    backgroundColor: 'rgba(168, 85, 247, 0.2)', // purple 500 20%
+  },
+  iconBgGreen: {
+    backgroundColor: 'rgba(34, 197, 94, 0.2)', // green 500 20%
   },
   cardContent: {
     flex: 1,
-    justifyContent: 'center',
-    gap: 2,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: 'bold',
     color: Colors.dark.text,
+    flex: 1,
+    marginRight: 8,
   },
   cardSubtitle: {
     fontSize: 12,
     fontWeight: '500',
     color: '#94a3b8',
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#22c55e', // Green 500
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#4ade80', // Green 400 (Brighter for dark mode)
-    textTransform: 'uppercase',
-  },
-  cardPriceContainer: {
-    alignItems: 'flex-end',
-    justifyContent: 'center',
+  cardDate: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 2,
   },
   cardPrice: {
     fontSize: 16,
-    fontWeight: '700',
-    color: Colors.dark.primary,
+    fontWeight: 'bold',
+    color: '#4ade80', // green 400
+  },
+
+  // Badges - YENİ (son 7 gün)
+  badgeNew: {
+    backgroundColor: 'rgba(34, 197, 94, 0.15)', // green 500 15%
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.3)',
+  },
+  badgeTextNew: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#4ade80', // green 400
+  },
+
+  // PDF badge
+  badgePdf: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.3)',
+  },
+  badgeTextPdf: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#c084fc', // purple 400
   },
 
   // Empty State
@@ -414,3 +477,4 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 });
+

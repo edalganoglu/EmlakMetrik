@@ -51,7 +51,7 @@ export default function OnboardingScreen() {
                             <MaterialIcons name="verified" size={48} color="#fff" />
                         </View>
                         <Text style={styles.title}>EmlakMetrik</Text>
-                        <Text style={styles.welcomeText}>Welcome to your new{'\n'}professional dashboard</Text>
+                        <Text style={styles.welcomeText}>Profesyonel gayrimenkul{'\n'}analiz platformunuza hoş geldiniz</Text>
                     </View>
 
                     {/* Reward Card */}
@@ -64,25 +64,25 @@ export default function OnboardingScreen() {
                         >
                             <View style={styles.cardHeader}>
                                 <MaterialIcons name="card-giftcard" size={20} color="rgba(255,255,255,0.8)" />
-                                <Text style={styles.cardLabel}>WELCOME BONUS</Text>
+                                <Text style={styles.cardLabel}>HOŞGELDİN BONUSU</Text>
                             </View>
 
                             <View style={styles.cardContent}>
                                 <Text style={styles.creditAmount}>5</Text>
                                 <View style={styles.creditDetail}>
-                                    <Text style={styles.creditLabel}>Free Credits</Text>
-                                    <Text style={styles.creditSub}>To start your analysis</Text>
+                                    <Text style={styles.creditLabel}>Ücretsiz Kredi</Text>
+                                    <Text style={styles.creditSub}>Analizlerinize başlamak için</Text>
                                 </View>
                             </View>
 
                             <View style={styles.cardFooter}>
-                                <Text style={styles.cardFooterText}>Valid for all premium reports</Text>
+                                <Text style={styles.cardFooterText}>Tüm premium raporlarda geçerlidir</Text>
                             </View>
                         </LinearGradient>
                     </View>
 
                     <Text style={styles.description}>
-                        You are all set! Explore market insights, detailed reports, and investment tools instantly.
+                        Her şey hazır! Piyasa analizleri, detaylı raporlar ve yatırım araçlarına anında ulaşın.
                     </Text>
 
                     {/* Bottom Action */}
@@ -100,7 +100,7 @@ export default function OnboardingScreen() {
                                 style={styles.buttonGradient}
                             >
                                 <Text style={styles.buttonText}>
-                                    {loading ? 'Setting up...' : 'Get Started'}
+                                    {loading ? 'Hazırlanıyor...' : 'Başla'}
                                 </Text>
                                 <MaterialIcons name="arrow-forward" size={20} color="#fff" />
                             </LinearGradient>

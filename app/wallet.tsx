@@ -69,7 +69,7 @@ export default function WalletScreen() {
             // Trigger UI update logic implies balance updates via trigger -> subscription
             fetchTransactions();
             if (type === 'reward' || type === 'deposit') {
-                Alert.alert('Success', `Successfully received ${amount} credits!`);
+                Alert.alert('Başarılı', `${amount} kredi hesabınıza aktarıldı!`);
             }
         }
     }
@@ -84,11 +84,11 @@ export default function WalletScreen() {
     async function buyCredits(amount: number, price: string) {
         // In a real app, this would integrate with IAP/Stripe
         Alert.alert(
-            'Confirm Purchase',
-            `Buy ${amount} Credits for ${price}?`,
+            'Satın Alımı Onayla',
+            `${amount} Kredi'yi ${price} karşılığında satın almak istiyor musunuz?`,
             [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Buy', onPress: () => addTransaction(amount, 'deposit', `Purchased ${amount} Credits Pack`) }
+                { text: 'İptal', style: 'cancel' },
+                { text: 'Satın Al', onPress: () => addTransaction(amount, 'deposit', `${amount} Kredi Paketi satın alındı`) }
             ]
         );
     }
@@ -217,10 +217,10 @@ export default function WalletScreen() {
                     </View>
                 </View>
 
-                {/* Transaction History */}
+                {/* İşlem Geçmişi */}
                 <View style={styles.historySection}>
                     <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>Recent Transactions</Text>
+                        <Text style={styles.sectionTitle}>Son İşlemler</Text>
                     </View>
 
                     {loading ? (
@@ -239,7 +239,7 @@ export default function WalletScreen() {
                     ) : transactions.length === 0 ? (
                         <View style={styles.emptyState}>
                             <MaterialIcons name="history" size={48} color="#cbd5e1" />
-                            <Text style={styles.emptyText}>No recent transactions</Text>
+                            <Text style={styles.emptyText}>Henüz işlem yok</Text>
                         </View>
                     ) : (
                         transactions.map((tx) => (
@@ -265,7 +265,7 @@ export default function WalletScreen() {
                     )}
 
                     <TouchableOpacity style={styles.viewAllButton}>
-                        <Text style={styles.viewAllText}>View All History</Text>
+                        <Text style={styles.viewAllText}>Tüm Geçmişi Gör</Text>
                         <MaterialIcons name="chevron-right" size={20} color="#64748b" />
                     </TouchableOpacity>
                 </View>
