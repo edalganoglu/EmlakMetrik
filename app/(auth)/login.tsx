@@ -17,8 +17,11 @@ import {
     View
 } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 export default function LoginScreen() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -57,7 +60,7 @@ export default function LoginScreen() {
             style={styles.container}
         >
             <StatusBar style="light" />
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: Math.max(60, insets.top + 20), paddingBottom: insets.bottom + 20 }]}>
 
                 {/* Header Logo Area */}
                 <View style={styles.headerContainer}>
@@ -173,7 +176,7 @@ export default function LoginScreen() {
                 </View>
 
             </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAvoidingView >
     );
 }
 

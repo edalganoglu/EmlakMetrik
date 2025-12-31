@@ -6,11 +6,12 @@ import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CalculatorScreen() {
     const { user } = useAuth();
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const [loading, setLoading] = useState(false);
     const [creditBalance, setCreditBalance] = useState<number | null>(null);
 
@@ -48,8 +49,6 @@ export default function CalculatorScreen() {
     };
 
     const calculate = () => {
-        // Basic calculation logic to match previous flow
-        // In a real app, complex financial math would go here
         const p = parseFloat(price) || 0;
         const r = parseFloat(rent) || 0;
         const d = parseFloat(dues) || 0;
@@ -60,10 +59,7 @@ export default function CalculatorScreen() {
         const monthlyExpenses = d;
         const netMonthlyIncome = r - monthlyExpenses;
 
-        // Amortization (Years)
         const amortization = netMonthlyIncome > 0 ? (totalCost / (netMonthlyIncome * 12)) : 0;
-
-        // ROI (Simple Annual)
         const annualNetIncome = netMonthlyIncome * 12;
         const roi = totalCost > 0 ? (annualNetIncome / totalCost) * 100 : 0;
 
@@ -88,7 +84,6 @@ export default function CalculatorScreen() {
 
         setLoading(true);
 
-        // 1. Deduct Credit via Wallet Transaction
         const { error: txError } = await supabase.from('wallet_transactions').insert({
             user_id: user.id,
             amount: -1,
@@ -102,7 +97,6 @@ export default function CalculatorScreen() {
             return;
         }
 
-        // 2. Save Property
         const { data, error } = await supabase.from('properties').insert({
             user_id: user.id,
             title: address || `Property ${price}`,
@@ -110,7 +104,7 @@ export default function CalculatorScreen() {
             price: parseFloat(price),
             monthly_rent: parseFloat(rent),
             status: 'completed',
-            is_unlocked: true, // Auto-unlock for now as we charge 1 credit
+            is_unlocked: true,
             params: {
                 dues: parseFloat(dues),
                 renovation: parseFloat(renovation),
@@ -124,7 +118,6 @@ export default function CalculatorScreen() {
         if (error) {
             Alert.alert('Error', error.message);
         } else {
-            // Update local balance immediately for better UX
             setCreditBalance((prev) => (prev !== null ? prev - 1 : prev));
 
             if (data && data.length > 0) {
@@ -139,7 +132,7 @@ export default function CalculatorScreen() {
     return (
         <View style={styles.mainContainer}>
             {/* Top App Bar */}
-            <SafeAreaView style={styles.safeArea} edges={['top']}>
+            <View style={[styles.safeArea, { paddingTop: insets.top }]}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
                         <MaterialIcons name="arrow-back" size={24} color={Colors.dark.text} />
@@ -151,9 +144,10 @@ export default function CalculatorScreen() {
                         <MaterialIcons name="refresh" size={24} color={Colors.dark.primary} />
                     </TouchableOpacity>
                 </View>
-            </SafeAreaView>
+            </View>
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 + insets.bottom }]}>
+                {/* ... keep existing content ... */}
 
                 {/* Credit Balance */}
                 <View style={styles.creditCard}>
@@ -361,7 +355,7 @@ export default function CalculatorScreen() {
             </ScrollView>
 
             {/* Bottom Button */}
-            <View style={styles.footer}>
+            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) + 10 }]}>
                 <TouchableOpacity
                     style={styles.calculateButton}
                     onPress={calculate}

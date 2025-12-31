@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
 
     // Sticky Bar
     stickyBar: {
-        backgroundColor: Colors.dark.surface,
+        backgroundColor: Colors.dark.background,
         paddingHorizontal: 16,
         paddingBottom: 16,
         borderBottomWidth: 1,
