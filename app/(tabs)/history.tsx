@@ -9,6 +9,7 @@ import {
   Alert,
   Animated,
   FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -32,14 +33,45 @@ export default function HistoryScreen() {
 
   const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
 
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
     fetchHistory(0, true);
+
+    const channel = supabase
+      .channel('history_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'properties' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            // New item added, refresh list to show it at top
+            fetchHistory(0, true);
+          } else if (payload.eventType === 'DELETE') {
+            setProperties((prev) => prev.filter((item) => item.id !== payload.old.id));
+          } else if (payload.eventType === 'UPDATE') {
+            setProperties((prev) => prev.map((item) => item.id === payload.new.id ? { ...item, ...payload.new } : item));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchHistory(0, true);
+    setRefreshing(false);
+  };
 
   const fetchHistory = async (pageNum: number, reset: boolean = false) => {
     try {
       if (reset) {
-        setLoading(true);
+        // Only show loading spinner if it's an initial load, not a refresh
+        if (!refreshing) setLoading(true);
       } else {
         setLoadingMore(true);
       }
@@ -73,6 +105,7 @@ export default function HistoryScreen() {
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      setRefreshing(false); // Ensure refreshing stops
     }
   };
 
@@ -360,6 +393,7 @@ export default function HistoryScreen() {
             onEndReached={loadMore}
             onEndReachedThreshold={0.5}
             contentContainerStyle={styles.listContent}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           />
         )}
 

@@ -3,51 +3,40 @@ import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function WalletScreen() {
-    const { user } = useAuth();
+    const { user, profile, refreshProfile } = useAuth();
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const [balance, setBalance] = useState(0);
+    // balance is now derived from global profile state
+    const balance = profile?.credit_balance ?? 0;
+
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
+    // Refresh profile when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            refreshProfile();
+            fetchTransactions();
+        }, [])
+    );
+
     useEffect(() => {
         if (!user) return;
-        fetchBalance();
         fetchTransactions();
-
-        // Subscribe to balance changes
-        const subscription = supabase
-            .channel('balance_updates')
-            .on(
-                'postgres_changes',
-                { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
-                (payload) => {
-                    setBalance(payload.new.credit_balance);
-                }
-            )
-            .subscribe();
-
-        return () => {
-            subscription.unsubscribe();
-        }
     }, [user]);
 
-    async function fetchBalance() {
-        const { data } = await supabase.from('profiles').select('credit_balance').eq('id', user!.id).single();
-        if (data) setBalance(data.credit_balance);
-    }
-
     async function fetchTransactions() {
+        if (!user) return;
         const { data } = await supabase
             .from('wallet_transactions')
             .select('*')
-            .eq('user_id', user!.id)
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(5);
         if (data) setTransactions(data);
@@ -66,7 +55,6 @@ export default function WalletScreen() {
         if (error) {
             Alert.alert('Error', error.message);
         } else {
-            // Trigger UI update logic implies balance updates via trigger -> subscription
             fetchTransactions();
             if (type === 'reward' || type === 'deposit') {
                 Alert.alert('Başarılı', `${amount} kredi hesabınıza aktarıldı!`);
@@ -77,7 +65,7 @@ export default function WalletScreen() {
     async function watchAd() {
         // Simulation
         setTimeout(() => {
-            addTransaction(2, 'reward', 'Watched Video Ad');
+            addTransaction(2, 'reward', 'Video Reklam İzleme');
         }, 1000);
     }
 

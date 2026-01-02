@@ -6,15 +6,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { decode } from 'base64-arraybuffer';
 import { EncodingType, readAsStringAsync } from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
-    const { user } = useAuth();
+    const { user, profile, refreshProfile } = useAuth();
     const router = useRouter();
-    const [profile, setProfile] = useState<any>(null);
+    // Removed local profile state as we use global profile
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
 
@@ -23,26 +23,25 @@ export default function ProfileScreen() {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
 
-    useEffect(() => {
-        if (!user) return;
-        setLoading(true);
-        fetchProfile();
-        setEmail(user.email || '');
-    }, [user]);
+    // Refresh profile when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            refreshProfile();
+        }, [])
+    );
 
-    async function fetchProfile() {
-        try {
-            const { data } = await supabase.from('profiles').select('*').eq('id', user!.id).single();
-            if (data) {
-                setProfile(data);
-                setFullName(data.full_name || '');
-                setEmail(user?.email || '');
-                setPhone(data.phone || '');
-            }
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        if (profile) {
+            setFullName(profile.full_name || '');
+            setPhone(profile.phone || '');
+            // email usually comes from auth user, but sync just in case
         }
-    }
+        if (user) {
+            setEmail(user.email || '');
+        }
+    }, [profile, user]);
+
+    // Removed fetchProfile since data comes from Context
 
     const pickImage = async () => {
         try {
@@ -86,7 +85,7 @@ export default function ProfileScreen() {
 
             if (updateError) throw updateError;
 
-            fetchProfile();
+            refreshProfile();
             Alert.alert('Başarılı', 'Profil fotoğrafı güncellendi!');
 
         } catch (error: any) {
@@ -118,7 +117,7 @@ export default function ProfileScreen() {
             Alert.alert('Hata', error.message);
         } else {
             Alert.alert('Başarılı', 'Profil başarıyla güncellendi.');
-            fetchProfile(); // refresh data
+            refreshProfile(); // refresh data
         }
     }
 
@@ -239,7 +238,7 @@ export default function ProfileScreen() {
                     <Text style={styles.sectionTitle}>Tercihler</Text>
                     <View style={styles.preferencesList}>
                         {/* Bildirimler */}
-                        <TouchableOpacity style={styles.preferenceItem}>
+                        <TouchableOpacity style={styles.preferenceItem} onPress={() => router.push('/notifications')}>
                             <View style={styles.preferenceLeft}>
                                 <View style={styles.preferenceIconBg}>
                                     <MaterialIcons name="notifications" size={24} color={Colors.dark.primary} />
@@ -255,14 +254,14 @@ export default function ProfileScreen() {
                         <View style={styles.listDivider} />
 
                         {/* Ödeme Yöntemleri */}
-                        <TouchableOpacity style={styles.preferenceItem}>
+                        <TouchableOpacity style={styles.preferenceItem} onPress={() => router.push('/wallet')}>
                             <View style={styles.preferenceLeft}>
                                 <View style={styles.preferenceIconBg}>
                                     <MaterialIcons name="payments" size={24} color={Colors.dark.primary} />
                                 </View>
                                 <View>
                                     <Text style={styles.preferenceTitle}>Ödeme Yöntemleri</Text>
-                                    <Text style={styles.preferenceSubtitle}>Kartlar ve faturalama</Text>
+                                    <Text style={styles.preferenceSubtitle}>Kredi satın al</Text>
                                 </View>
                             </View>
                             <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
@@ -271,14 +270,14 @@ export default function ProfileScreen() {
                         <View style={styles.listDivider} />
 
                         {/* Güvenlik */}
-                        <TouchableOpacity style={styles.preferenceItem}>
+                        <TouchableOpacity style={styles.preferenceItem} onPress={() => router.push('/security')}>
                             <View style={styles.preferenceLeft}>
                                 <View style={styles.preferenceIconBg}>
                                     <MaterialIcons name="lock" size={24} color={Colors.dark.primary} />
                                 </View>
                                 <View>
                                     <Text style={styles.preferenceTitle}>Güvenlik</Text>
-                                    <Text style={styles.preferenceSubtitle}>Şifre & 2FA</Text>
+                                    <Text style={styles.preferenceSubtitle}>Şifre değiştir</Text>
                                 </View>
                             </View>
                             <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />

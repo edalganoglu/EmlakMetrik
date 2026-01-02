@@ -2,34 +2,37 @@ import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const { user, profile, refreshProfile } = useAuth();
+  // removed local profile state
   const [properties, setProperties] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+
+  // Refresh profile when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refreshProfile();
+    }, [])
+  );
 
   const fetchData = useCallback(async () => {
     if (!user) return;
     try {
       setRefreshing(true);
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (profileData) setProfile(profileData);
+      // Also refresh profile on pull-to-refresh
+      refreshProfile();
 
       const { data: propData } = await supabase
         .from('properties')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10);
 
       if (propData) setProperties(propData);
 
@@ -42,7 +45,38 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+
+    // Subscribe to properties changes (Realtime for the list)
+    if (!user) return;
+
+    const channel = supabase
+      .channel('properties_list_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'properties',
+          filter: `user_id=eq.${user.id}`, // Filter by user to avoid getting everyone's updates
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setProperties((prev) => [payload.new, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setProperties((prev) =>
+              prev.map((item) => (item.id === payload.new.id ? payload.new : item))
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setProperties((prev) => prev.filter((item) => item.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchData, user]);
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
