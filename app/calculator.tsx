@@ -743,36 +743,35 @@ const styles = StyleSheet.create({
     },
     safeArea: {
         backgroundColor: Colors.dark.background,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.dark.border,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 8,
-        paddingVertical: 12,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
     iconButton: {
-        width: 48,
-        height: 48,
+        width: 40,
+        height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 24,
+        borderRadius: 20,
+        backgroundColor: Colors.dark.surface,
     },
     cancelText: {
         fontSize: 16,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#94a3b8',
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
+        fontSize: 20,
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     resetText: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.primary,
     },
     content: {
@@ -808,12 +807,12 @@ const styles = StyleSheet.create({
     },
     creditTitle: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     creditSubtitle: {
         fontSize: 12,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#94a3b8',
     },
     buyButton: {
@@ -826,7 +825,7 @@ const styles = StyleSheet.create({
     },
     buyButtonText: {
         fontSize: 12,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
 
@@ -836,7 +835,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         marginBottom: 16,
     },
@@ -845,7 +844,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: '#cbd5e1',
         marginBottom: 8,
         marginLeft: 4,
@@ -865,7 +864,7 @@ const styles = StyleSheet.create({
         height: '100%',
         paddingHorizontal: 16,
         fontSize: 18,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: Colors.dark.text,
     },
     suffix: {
@@ -880,12 +879,14 @@ const styles = StyleSheet.create({
     helperText: {
         fontSize: 12,
         color: Colors.dark.primary,
+        fontFamily: 'Manrope_400Regular',
         marginTop: 6,
         marginLeft: 4,
     },
     helperTextSmall: {
         fontSize: 11,
         color: '#94a3b8',
+        fontFamily: 'Manrope_400Regular',
         marginTop: 8,
         marginLeft: 4,
         lineHeight: 16,
@@ -916,7 +917,7 @@ const styles = StyleSheet.create({
         height: '100%',
         paddingHorizontal: 12,
         fontSize: 16,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: Colors.dark.text,
     },
     suffixSmall: {
@@ -946,7 +947,7 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         fontSize: 10,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.primary,
     },
 
@@ -964,7 +965,7 @@ const styles = StyleSheet.create({
     },
     switchLabel: {
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: Colors.dark.text,
     },
     loanCard: {
@@ -979,7 +980,7 @@ const styles = StyleSheet.create({
     },
     loanRateValue: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     sliderRow: {
@@ -1002,7 +1003,7 @@ const styles = StyleSheet.create({
         flex: 1,
         textAlign: 'center',
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     rateSuffix: {
@@ -1033,10 +1034,11 @@ const styles = StyleSheet.create({
     loanPreviewLabel: {
         fontSize: 12,
         color: '#94a3b8',
+        fontFamily: 'Manrope_400Regular',
     },
     loanPreviewValue: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
 
@@ -1059,7 +1061,7 @@ const styles = StyleSheet.create({
     },
     comparableLabel: {
         fontSize: 12,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: '#cbd5e1',
         marginBottom: 8,
     },
@@ -1083,7 +1085,7 @@ const styles = StyleSheet.create({
     },
     comparableResultText: {
         fontSize: 13,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.primary,
     },
 
@@ -1117,7 +1119,7 @@ const styles = StyleSheet.create({
     calculateButtonText: {
         color: '#fff',
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
     },
     costBadge: {
         backgroundColor: 'rgba(255,255,255,0.2)',
@@ -1128,7 +1130,7 @@ const styles = StyleSheet.create({
     costText: {
         color: '#fff',
         fontSize: 12,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
     },
 
     // Market Info Card Styles
@@ -1147,7 +1149,7 @@ const styles = StyleSheet.create({
     },
     marketInfoTitle: {
         fontSize: 15,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.text,
         flex: 1,
     },
@@ -1167,10 +1169,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#94a3b8',
         marginBottom: 4,
+        fontFamily: 'Manrope_400Regular',
     },
     marketInfoValue: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     marketComparisonResult: {
@@ -1184,6 +1187,6 @@ const styles = StyleSheet.create({
     },
     marketComparisonText: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
     },
 });

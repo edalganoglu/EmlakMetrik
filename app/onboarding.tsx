@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -47,10 +47,12 @@ export default function OnboardingScreen() {
 
                     {/* Header / Hero Section */}
                     <View style={styles.heroSection}>
-                        <View style={styles.iconContainer}>
-                            <MaterialIcons name="verified" size={48} color="#fff" />
-                        </View>
-                        <Text style={styles.title}>EmlakMetrik</Text>
+                        <Image
+                            source={require('@/assets/images/logo-vertical.png')}
+                            style={{ width: width * 0.7, height: 100 }}
+                            resizeMode="contain"
+                        />
+                        {/* <Text style={styles.title}>EmlakMetrik</Text> */}
                         <Text style={styles.welcomeText}>Profesyonel gayrimenkul{'\n'}analiz platformunuza hoş geldiniz</Text>
                     </View>
 
@@ -155,7 +157,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 28,
-        fontWeight: '800',
+        fontFamily: 'Manrope_800ExtraBold',
         color: '#0f172a',
         marginBottom: 8,
         letterSpacing: -0.5,
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
     welcomeText: {
         fontSize: 18,
         color: '#64748b',
+        fontFamily: 'Manrope_400Regular',
         textAlign: 'center',
         lineHeight: 26,
     },
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
     },
     cardLabel: {
         color: 'rgba(255,255,255,0.9)',
-        fontWeight: '700',
+        fontFamily: 'Manrope_700Bold',
         fontSize: 12,
         letterSpacing: 1.5,
         marginLeft: 8,
@@ -204,7 +207,7 @@ const styles = StyleSheet.create({
     },
     creditAmount: {
         fontSize: 56,
-        fontWeight: '800',
+        fontFamily: 'Manrope_800ExtraBold',
         color: '#fff',
         includeFontPadding: false,
     },
@@ -214,11 +217,12 @@ const styles = StyleSheet.create({
     },
     creditLabel: {
         fontSize: 20,
-        fontWeight: '700',
+        fontFamily: 'Manrope_700Bold',
         color: '#fff',
     },
     creditSub: {
         fontSize: 14,
+        fontFamily: 'Manrope_400Regular',
         color: 'rgba(255,255,255,0.8)',
     },
     cardFooter: {
@@ -229,11 +233,12 @@ const styles = StyleSheet.create({
     cardFooterText: {
         color: 'rgba(255,255,255,0.9)',
         fontSize: 13,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
     },
     description: {
         fontSize: 15,
         color: '#64748b',
+        fontFamily: 'Manrope_400Regular',
         textAlign: 'center',
         marginHorizontal: 20,
         lineHeight: 22,
@@ -260,7 +265,7 @@ const styles = StyleSheet.create({
     buttonText: {
         color: '#fff',
         fontSize: 17,
-        fontWeight: '700',
+        fontFamily: 'Manrope_700Bold',
         marginRight: 8,
     },
 });

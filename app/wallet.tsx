@@ -284,22 +284,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
         backgroundColor: Colors.dark.background,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.dark.border,
+        // Removed border to match History style if desired, or keep it. 
+        // History screen code viewed didn't show border on the 'header' object specifically, 
+        // but let's stick to the padding/font size request.
     },
     backButton: {
-        width: 48,
-        height: 48,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 24,
+        backgroundColor: Colors.dark.surface,
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
+        fontSize: 20,
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         textAlign: 'center',
     },
@@ -348,7 +350,7 @@ const styles = StyleSheet.create({
     balanceLabel: {
         color: '#dbeafe', // blue-100
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         textTransform: 'uppercase',
         letterSpacing: 1,
         marginBottom: 8,
@@ -362,14 +364,14 @@ const styles = StyleSheet.create({
     },
     balanceValue: {
         fontSize: 48,
-        fontWeight: '800',
+        fontFamily: 'Manrope_800ExtraBold',
         color: '#fff',
         letterSpacing: -1,
     },
     balanceUnit: {
         color: '#dbeafe',
         fontSize: 16,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
     },
 
     // Sections
@@ -384,7 +386,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         paddingHorizontal: 4,
     },
@@ -418,7 +420,7 @@ const styles = StyleSheet.create({
     },
     freeTitle: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         marginBottom: 4,
     },
@@ -444,7 +446,7 @@ const styles = StyleSheet.create({
     watchButtonText: {
         color: '#fff',
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
     },
 
     // Store / Packages
@@ -457,7 +459,7 @@ const styles = StyleSheet.create({
     restoreText: {
         color: Colors.dark.primary,
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
     },
     packagesGrid: {
         gap: 16,
@@ -493,7 +495,7 @@ const styles = StyleSheet.create({
     popularText: {
         color: '#fff',
         fontSize: 10,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
     },
     packageCardInner: {
         flexDirection: 'row',
@@ -525,12 +527,12 @@ const styles = StyleSheet.create({
     },
     packageName: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     creditsText: {
         color: Colors.dark.primary,
-        fontWeight: '800',
+        fontFamily: 'Manrope_800ExtraBold',
         fontSize: 20,
     },
     creditsNum: {
@@ -538,12 +540,12 @@ const styles = StyleSheet.create({
     },
     creditsUnit: {
         fontSize: 12,
-        fontWeight: 'normal',
+        fontFamily: 'Manrope_400Regular',
         color: '#94a3b8',
     },
     creditsTextPro: {
         color: Colors.dark.primary,
-        fontWeight: '800',
+        fontFamily: 'Manrope_800ExtraBold',
         fontSize: 20,
     },
     creditsNumPro: {
@@ -562,7 +564,7 @@ const styles = StyleSheet.create({
     },
     priceButtonText: {
         color: Colors.dark.text,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         fontSize: 14,
     },
     priceButtonPro: {
@@ -581,7 +583,7 @@ const styles = StyleSheet.create({
     },
     priceButtonTextPro: {
         color: '#fff',
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         fontSize: 14,
     },
 
@@ -600,7 +602,7 @@ const styles = StyleSheet.create({
         borderBottomColor: Colors.dark.border,
     },
     historyAmount: {
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         fontSize: 16,
     },
     viewAllButton: {
@@ -612,7 +614,7 @@ const styles = StyleSheet.create({
     },
     viewAllText: {
         color: '#94a3b8',
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
     },
     historyLeft: {
         flexDirection: 'row',
@@ -631,7 +633,7 @@ const styles = StyleSheet.create({
     },
     historyTitle: {
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: Colors.dark.text,
     },
     historySubtitle: {
@@ -646,6 +648,6 @@ const styles = StyleSheet.create({
     emptyText: {
         color: '#94a3b8',
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
     },
 });

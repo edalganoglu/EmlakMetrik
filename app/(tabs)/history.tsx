@@ -130,9 +130,12 @@ export default function HistoryScreen() {
 
     // Apply status filter
     if (filter === 'All') return filtered;
-    if (filter === 'Completed') return filtered.filter(p => p.status === 'completed');
-    if (filter === 'Drafts') return filtered.filter(p => p.status === 'draft');
-    if (filter === 'Paid') return filtered.filter(p => p.is_unlocked);
+    if (filter === 'PDF') return filtered.filter(p => p.pdf_generated);
+    if (filter === 'New') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return filtered.filter(p => new Date(p.created_at) > sevenDaysAgo);
+    }
     return filtered;
   };
 
@@ -305,9 +308,8 @@ export default function HistoryScreen() {
             contentContainerStyle={styles.filtersContent}
             data={[
               { value: 'All', label: 'Tümü' },
-              { value: 'Completed', label: 'Tamamlanan' },
-              { value: 'Drafts', label: 'Taslaklar' },
-              { value: 'Paid', label: 'Açılmış' }
+              { value: 'PDF', label: 'PDF Raporlu' },
+              { value: 'New', label: 'Yeni (Son 7 Gün)' }
             ]}
             keyExtractor={(item) => item.value}
             renderItem={({ item: f }) => {
@@ -390,7 +392,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: Colors.dark.text,
   },
   filterButton: {
@@ -399,9 +401,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: Colors.dark.surface,
   },
-
-  // Search
   searchContainer: {
     paddingHorizontal: 20,
     paddingBottom: 8,
@@ -423,6 +424,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 14,
+    fontFamily: 'Manrope_500Medium',
     color: Colors.dark.text,
   },
 
@@ -455,12 +457,12 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'Manrope_500Medium',
     color: '#94a3b8',
   },
   chipTextActive: {
     color: '#fff',
-    fontWeight: '600',
+    fontFamily: 'Manrope_600SemiBold',
   },
 
   // List
@@ -475,7 +477,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: '#94a3b8',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -529,19 +531,19 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: Colors.dark.text,
     flex: 1,
     marginRight: 8,
   },
   cardPrice: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: '#4ade80', // green 400
   },
   cardSubtitle: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: 'Manrope_500Medium',
     color: '#94a3b8',
   },
   cardDate: {
@@ -561,7 +563,7 @@ const styles = StyleSheet.create({
   },
   badgeTextNew: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: '#4ade80', // green 400
   },
 
@@ -578,7 +580,7 @@ const styles = StyleSheet.create({
   },
   badgeTextPdf: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: '#c084fc', // purple 400
   },
 

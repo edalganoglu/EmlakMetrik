@@ -49,10 +49,11 @@ export default function HomeScreen() {
       {/* Top App Bar */}
       <View style={styles.topAppBar}>
         <View style={styles.appTitleContainer}>
-          <View style={styles.appIconWrapper}>
-            <MaterialIcons name="apartment" size={24} color={Colors.dark.primary} />
-          </View>
-          <Text style={styles.appTitle}>Emlak Asistanı</Text>
+          <Image
+            source={require('@/assets/images/logo-vertical.png')}
+            style={{ width: 140, height: 40 }}
+            resizeMode="contain"
+          />
         </View>
         <TouchableOpacity style={styles.notificationButton}>
           <MaterialIcons name="notifications-none" size={24} color={Colors.dark.icon} />
@@ -220,8 +221,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: Colors.dark.background,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
   },
   appTitleContainer: {
     flexDirection: 'row',
@@ -238,7 +237,7 @@ const styles = StyleSheet.create({
   },
   appTitle: {
     fontSize: 18,
-    fontWeight: '800', // Extra bold
+    fontFamily: 'Manrope_800ExtraBold',
     color: Colors.dark.text,
     letterSpacing: -0.5,
   },
@@ -248,7 +247,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.dark.surface,
   },
 
   // Profile Section
@@ -284,12 +283,12 @@ const styles = StyleSheet.create({
   },
   greetingText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'Manrope_500Medium',
     color: '#94a3b8',
   },
   userName: {
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'Manrope_800ExtraBold',
     color: Colors.dark.text,
     letterSpacing: -0.5,
   },
@@ -310,7 +309,7 @@ const styles = StyleSheet.create({
   },
   creditLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Manrope_600SemiBold',
     color: '#cbd5e1',
   },
   creditValueBadge: {
@@ -322,7 +321,7 @@ const styles = StyleSheet.create({
   creditValueText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'Manrope_700Bold',
   },
 
   // Recent Analysis
@@ -336,12 +335,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'Manrope_700Bold',
     color: Colors.dark.text,
   },
   seeAllText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Manrope_600SemiBold',
     color: Colors.dark.primary,
   },
 
@@ -392,14 +391,14 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: Colors.dark.text,
     flex: 1,
     marginRight: 8,
   },
   cardSubtitle: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: 'Manrope_500Medium',
     color: '#94a3b8',
   },
   cardDate: {
@@ -409,7 +408,7 @@ const styles = StyleSheet.create({
   },
   cardPrice: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: '#4ade80', // green 400
   },
 
@@ -424,7 +423,7 @@ const styles = StyleSheet.create({
   },
   badgeTextNew: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: '#4ade80', // green 400
   },
 
@@ -441,7 +440,7 @@ const styles = StyleSheet.create({
   },
   badgeTextPdf: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
     color: '#c084fc', // purple 400
   },
 
@@ -456,7 +455,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     color: Colors.dark.primary,
-    fontWeight: 'bold',
+    fontFamily: 'Manrope_700Bold',
   },
 
   // FAB

@@ -1329,7 +1329,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
         paddingTop: 50,
         paddingBottom: 16,
         backgroundColor: Colors.dark.background,
@@ -1343,8 +1343,8 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.dark.surface,
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
+        fontSize: 20,
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
 
@@ -1355,18 +1355,19 @@ const styles = StyleSheet.create({
     },
     propertyTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         marginBottom: 4,
     },
     propertyLocation: {
         fontSize: 14,
         color: '#94a3b8',
+        fontFamily: 'Manrope_400Regular',
         marginBottom: 8,
     },
     propertyPrice: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_800ExtraBold',
         color: Colors.dark.primary,
     },
 
@@ -1421,7 +1422,7 @@ const styles = StyleSheet.create({
     pdfButtonText: {
         color: '#fff',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
     },
     costBadge: {
         flexDirection: 'row',
@@ -1435,7 +1436,7 @@ const styles = StyleSheet.create({
     costText: {
         color: '#fff',
         fontSize: 12,
-        fontWeight: '800',
+        fontFamily: 'Manrope_800ExtraBold',
     },
 
     // Content
@@ -1457,12 +1458,13 @@ const styles = StyleSheet.create({
     },
     cardTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         marginBottom: 8,
     },
     cardSubtitle: {
         fontSize: 14,
+        fontFamily: 'Manrope_400Regular',
         color: '#94a3b8',
     },
     overviewGrid: {
@@ -1476,11 +1478,12 @@ const styles = StyleSheet.create({
     overviewLabel: {
         fontSize: 14,
         color: '#94a3b8',
+        fontFamily: 'Manrope_400Regular',
         marginBottom: 4,
     },
     overviewValue: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_800ExtraBold',
         color: Colors.dark.text,
     },
     trendBadge: {
@@ -1501,7 +1504,7 @@ const styles = StyleSheet.create({
     },
     trendText: {
         fontSize: 12,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
     },
 
     // Net Income
@@ -1517,16 +1520,17 @@ const styles = StyleSheet.create({
     },
     netIncomeLabel: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.text,
     },
     netIncomeSubtitle: {
         fontSize: 12,
+        fontFamily: 'Manrope_400Regular',
         color: '#94a3b8',
     },
     netIncomeValue: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_800ExtraBold',
         color: '#10b981',
     },
     netIncomeNegative: {

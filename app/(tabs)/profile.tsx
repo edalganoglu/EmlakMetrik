@@ -309,11 +309,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
         backgroundColor: Colors.dark.background,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.dark.border,
     },
     backButton: {
         width: 40,
@@ -322,13 +320,13 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
+        fontSize: 20,
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     saveText: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.primary,
     },
     content: {

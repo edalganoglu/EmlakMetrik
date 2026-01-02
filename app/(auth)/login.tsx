@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -14,7 +15,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -65,8 +66,11 @@ export default function LoginScreen() {
                 {/* Header Logo Area */}
                 <View style={styles.headerContainer}>
                     <View style={styles.logoRow}>
-                        <MaterialIcons name="apartment" size={24} color={Colors.dark.primary} />
-                        <Text style={styles.logoText}>EmlakMetrik</Text>
+                        <Image
+                            source={require('@/assets/images/logo-vertical.png')}
+                            style={{ width: 180, height: 60 }}
+                            resizeMode="contain"
+                        />
                     </View>
                     <Text style={styles.heroTitle}>Güvenle Analiz Edin</Text>
                     <Text style={styles.heroSubtitle}>Maliyetleri takip edin ve kredilerinizi verimli yönetin.</Text>
