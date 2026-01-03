@@ -1063,7 +1063,7 @@ const styles = StyleSheet.create({
     balanceLabel: {
         color: '#94a3b8',
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
     },
     balanceValueContainer: {
         flexDirection: 'row',
@@ -1072,7 +1072,7 @@ const styles = StyleSheet.create({
     },
     balanceValueText: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     pdfButton: {
@@ -1222,7 +1222,7 @@ const styles = StyleSheet.create({
     },
     loanBadgeText: {
         fontSize: 12,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: '#f59e0b',
     },
     loanDetailsGrid: {
@@ -1246,7 +1246,7 @@ const styles = StyleSheet.create({
     },
     loanDetailValue: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     loanSummary: {
@@ -1265,7 +1265,7 @@ const styles = StyleSheet.create({
     },
     loanSummaryValue: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.primary,
     },
 
@@ -1283,7 +1283,7 @@ const styles = StyleSheet.create({
     },
     marketBadgeText: {
         fontSize: 12,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
     },
     marketComparisonGrid: {
         flexDirection: 'row',
@@ -1302,10 +1302,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#94a3b8',
         marginBottom: 4,
+        fontFamily: 'Manrope_400Regular',
     },
     marketValue: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     marketDifferenceRow: {
@@ -1324,7 +1325,7 @@ const styles = StyleSheet.create({
     },
     marketDifferenceValue: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
     },
 
     divider: {
@@ -1340,18 +1341,18 @@ const styles = StyleSheet.create({
     },
     expenseTitle: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: '#cbd5e1',
     },
     periodBadge: {
         fontSize: 12,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#cbd5e1',
         backgroundColor: Colors.dark.background,
     },
     totalExpense: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     expenseDistributionGrid: {
@@ -1373,7 +1374,7 @@ const styles = StyleSheet.create({
     },
     expenseName: {
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#cbd5e1',
     },
     expensePercent: {
@@ -1390,7 +1391,7 @@ const styles = StyleSheet.create({
     },
     periodBadgeInline: {
         fontSize: 12,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#cbd5e1',
         backgroundColor: Colors.dark.background,
         paddingHorizontal: 8,
@@ -1410,11 +1411,11 @@ const styles = StyleSheet.create({
     donutLabelTitle: {
         fontSize: 12,
         color: '#94a3b8',
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
     },
     donutLabelValue: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
 
@@ -1437,7 +1438,7 @@ const styles = StyleSheet.create({
     chartTooltipText: {
         color: Colors.dark.text,
         fontSize: 12,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
     },
     chartTooltipArrow: {
         width: 0,
@@ -1469,7 +1470,7 @@ const styles = StyleSheet.create({
     },
     warningTitle: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: '#f59e0b',
     },
     warningText: {
@@ -1479,7 +1480,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     warningHighlight: {
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: '#ef4444',
     },
     warningDetails: {
@@ -1508,17 +1509,17 @@ const styles = StyleSheet.create({
     },
     warningLabelBold: {
         fontSize: 13,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     warningValuePositive: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: '#10b981',
     },
     warningValueNegative: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: '#ef4444',
     },
     warningFooter: {

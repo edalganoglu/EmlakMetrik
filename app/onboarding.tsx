@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     skipText: {
         color: '#94a3b8',
         fontSize: 15,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
     },
     content: {
         flex: 1,
@@ -187,14 +187,14 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 30,
-        fontWeight: '700',
+        fontFamily: 'Manrope_700Bold',
         color: '#fff',
         textAlign: 'center',
         letterSpacing: -0.5,
     },
     creditAmount: {
         fontSize: 52,
-        fontWeight: '800',
+        fontFamily: 'Manrope_800ExtraBold',
         color: Colors.dark.primary,
         textAlign: 'center',
         letterSpacing: -1,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: 16,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#94a3b8',
         textAlign: 'center',
         lineHeight: 24,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     },
     claimButtonText: {
         fontSize: 17,
-        fontWeight: '700',
+        fontFamily: 'Manrope_700Bold',
         color: '#fff',
         letterSpacing: 0.3,
     },
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     },
     helpText: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: '#64748b',
     },
 });

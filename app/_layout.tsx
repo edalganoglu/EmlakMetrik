@@ -73,6 +73,7 @@ function RootLayoutNav() {
         <Stack.Screen name="notifications" options={{ headerShown: false }} />
         <Stack.Screen name="security" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="methodology" options={{ presentation: 'modal', headerShown: false }} />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>

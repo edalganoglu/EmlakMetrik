@@ -18,10 +18,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export interface LocationOption {
     id: string;
     city: string;
-    district: string | null;
-    neighborhood: string | null;
     display_name: string;
-    level: 'city' | 'district' | 'neighborhood';
+    level: 'city';
     avg_price_per_sqm?: number;
     avg_rent_per_sqm?: number;
     avg_dues?: number;
@@ -38,8 +36,8 @@ interface LocationPickerProps {
 export function LocationPicker({
     value,
     onSelect,
-    placeholder = 'Konum seçin...',
-    label = 'Şehir / Bölge',
+    placeholder = 'Şehir seçin...',
+    label = 'Şehir',
 }: LocationPickerProps) {
     const insets = useSafeAreaInsets();
     const [modalVisible, setModalVisible] = useState(false);
@@ -120,64 +118,21 @@ export function LocationPicker({
         }, 100);
     };
 
-    const getLevelIcon = (level: string) => {
-        switch (level) {
-            case 'neighborhood':
-                return 'place';
-            case 'district':
-                return 'location-city';
-            case 'city':
-                return 'location-on';
-            default:
-                return 'location-on';
-        }
-    };
-
-    const getLevelColor = (level: string) => {
-        switch (level) {
-            case 'neighborhood':
-                return '#10b981';
-            case 'district':
-                return '#60a5fa';
-            case 'city':
-                return '#f59e0b';
-            default:
-                return '#94a3b8';
-        }
-    };
-
-    const getLevelLabel = (level: string) => {
-        switch (level) {
-            case 'neighborhood':
-                return 'Mahalle';
-            case 'district':
-                return 'İlçe';
-            case 'city':
-                return 'İl';
-            default:
-                return '';
-        }
-    };
-
     const renderOption = ({ item }: { item: LocationOption }) => (
         <TouchableOpacity
             style={styles.optionItem}
             onPress={() => handleSelect(item)}
             activeOpacity={0.7}
         >
-            <View style={[styles.optionIcon, { backgroundColor: getLevelColor(item.level) + '20' }]}>
-                <MaterialIcons
-                    name={getLevelIcon(item.level) as any}
-                    size={20}
-                    color={getLevelColor(item.level)}
-                />
+            <View style={[styles.optionIcon, { backgroundColor: '#f59e0b20' }]}>
+                <MaterialIcons name="location-on" size={20} color="#f59e0b" />
             </View>
             <View style={styles.optionContent}>
                 <Text style={styles.optionTitle}>{item.display_name}</Text>
                 <View style={styles.optionMeta}>
-                    <View style={[styles.levelBadge, { backgroundColor: getLevelColor(item.level) + '20' }]}>
-                        <Text style={[styles.levelBadgeText, { color: getLevelColor(item.level) }]}>
-                            {getLevelLabel(item.level)}
+                    <View style={[styles.levelBadge, { backgroundColor: '#f59e0b20' }]}>
+                        <Text style={[styles.levelBadgeText, { color: '#f59e0b' }]}>
+                            Şehir
                         </Text>
                     </View>
                     {item.avg_price_per_sqm && (
@@ -199,17 +154,13 @@ export function LocationPicker({
                 <TouchableOpacity style={styles.selectButton} onPress={openModal} activeOpacity={0.7}>
                     {value ? (
                         <View style={styles.selectedValue}>
-                            <MaterialIcons
-                                name={getLevelIcon(value.level) as any}
-                                size={18}
-                                color={getLevelColor(value.level)}
-                            />
+                            <MaterialIcons name="location-on" size={18} color="#f59e0b" />
                             <Text style={styles.selectedText} numberOfLines={1}>
                                 {value.display_name}
                             </Text>
-                            <View style={[styles.levelBadgeSmall, { backgroundColor: getLevelColor(value.level) + '20' }]}>
-                                <Text style={[styles.levelBadgeTextSmall, { color: getLevelColor(value.level) }]}>
-                                    {getLevelLabel(value.level)}
+                            <View style={[styles.levelBadgeSmall, { backgroundColor: '#f59e0b20' }]}>
+                                <Text style={[styles.levelBadgeTextSmall, { color: '#f59e0b' }]}>
+                                    Şehir
                                 </Text>
                             </View>
                         </View>
@@ -223,7 +174,7 @@ export function LocationPicker({
                 </TouchableOpacity>
                 {value && value.avg_price_per_sqm && (
                     <Text style={styles.helperText}>
-                        💡 Bölge ort.: m²: ₺{value.avg_price_per_sqm.toLocaleString('tr-TR')} | Aidat: ₺{value.avg_dues?.toLocaleString('tr-TR')}
+                        💡 {value.city} ort.: m²: ₺{value.avg_price_per_sqm.toLocaleString('tr-TR')}
                     </Text>
                 )}
             </View>
@@ -244,7 +195,7 @@ export function LocationPicker({
                         >
                             <MaterialIcons name="close" size={24} color={Colors.dark.text} />
                         </TouchableOpacity>
-                        <Text style={styles.modalTitle}>Konum Seçin</Text>
+                        <Text style={styles.modalTitle}>Şehir Seçin</Text>
                         <View style={styles.closeButton} />
                     </View>
 
@@ -255,7 +206,7 @@ export function LocationPicker({
                             <TextInput
                                 ref={searchInputRef}
                                 style={styles.searchInput}
-                                placeholder="İl, ilçe veya mahalle ara..."
+                                placeholder="Şehir ara..."
                                 placeholderTextColor="#64748b"
                                 value={searchQuery}
                                 onChangeText={handleSearchChange}
@@ -274,12 +225,12 @@ export function LocationPicker({
                     {(loading || initialLoading) ? (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color={Colors.dark.primary} />
-                            <Text style={styles.loadingText}>Konumlar yükleniyor...</Text>
+                            <Text style={styles.loadingText}>Şehirler yükleniyor...</Text>
                         </View>
                     ) : options.length === 0 ? (
                         <View style={styles.emptyContainer}>
                             <MaterialIcons name="location-off" size={48} color="#64748b" />
-                            <Text style={styles.emptyText}>Konum bulunamadı</Text>
+                            <Text style={styles.emptyText}>Şehir bulunamadı</Text>
                             <Text style={styles.emptySubtext}>Farklı bir arama terimi deneyin</Text>
                         </View>
                     ) : (
@@ -297,7 +248,7 @@ export function LocationPicker({
                     {/* Helper Text */}
                     <View style={styles.modalFooter}>
                         <Text style={styles.footerText}>
-                            💡 Daha spesifik konum seçerseniz daha doğru veriler alırsınız
+                            💡 Sadece Türkiye içindeki şehirleri kapsar
                         </Text>
                     </View>
                 </View>
@@ -400,7 +351,7 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
 
@@ -425,6 +376,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: Colors.dark.text,
+        fontFamily: 'Manrope_500Medium',
     },
 
     // List
@@ -451,7 +403,7 @@ const styles = StyleSheet.create({
     },
     optionTitle: {
         fontSize: 15,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.text,
         marginBottom: 4,
     },
@@ -463,6 +415,7 @@ const styles = StyleSheet.create({
     optionPrice: {
         fontSize: 12,
         color: '#94a3b8',
+        fontFamily: 'Manrope_400Regular',
     },
     separator: {
         height: 8,
@@ -478,6 +431,7 @@ const styles = StyleSheet.create({
     loadingText: {
         fontSize: 14,
         color: '#94a3b8',
+        fontFamily: 'Manrope_400Regular',
     },
     emptyContainer: {
         flex: 1,
@@ -487,13 +441,14 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.text,
         marginTop: 8,
     },
     emptySubtext: {
         fontSize: 14,
         color: '#94a3b8',
+        fontFamily: 'Manrope_400Regular',
     },
 
     // Footer
@@ -506,5 +461,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#94a3b8',
         textAlign: 'center',
+        fontFamily: 'Manrope_400Regular',
     },
 });

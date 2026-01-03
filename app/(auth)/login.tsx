@@ -425,12 +425,12 @@ const styles = StyleSheet.create({
     },
     logoText: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     heroTitle: {
         fontSize: 32,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         textAlign: 'center',
         marginBottom: 8,
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
     },
     promoText: {
         color: Colors.dark.primary,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         fontSize: 14,
     },
     tabContainer: {
@@ -491,19 +491,19 @@ const styles = StyleSheet.create({
     },
     tabText: {
         fontSize: 15,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: 'rgba(148, 163, 184, 0.6)',
     },
     activeTabText: {
         color: '#fff',
-        fontWeight: '700',
+        fontFamily: 'Manrope_700Bold',
     },
     formContainer: {
         marginBottom: 24,
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.text,
         marginBottom: 8,
     },
@@ -526,6 +526,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.dark.text,
         height: '100%',
+        fontFamily: 'Manrope_500Medium',
     },
     eyeIcon: {
         padding: 4,
@@ -539,7 +540,7 @@ const styles = StyleSheet.create({
     forgotText: {
         color: Colors.dark.primary,
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
     },
     mainButton: {
         backgroundColor: Colors.dark.primary,
@@ -556,7 +557,7 @@ const styles = StyleSheet.create({
     },
     mainButtonText: {
         color: '#fff',
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         fontSize: 16,
     },
     dividerContainer: {
@@ -592,7 +593,7 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     socialButtonText: {
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.text,
         fontSize: 14,
     },
@@ -611,6 +612,6 @@ const styles = StyleSheet.create({
     footerLink: {
         color: '#94a3b8',
         fontSize: 12,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
     },
 });

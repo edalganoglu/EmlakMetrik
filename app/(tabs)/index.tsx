@@ -94,8 +94,11 @@ export default function HomeScreen() {
             resizeMode="contain"
           />
         </View>
-        <TouchableOpacity style={styles.notificationButton}>
-          <MaterialIcons name="notifications-none" size={24} color={Colors.dark.icon} />
+        <TouchableOpacity
+          style={styles.headerActionButton}
+          onPress={() => router.push('/methodology')}
+        >
+          <MaterialIcons name="help-outline" size={24} color={Colors.dark.icon} />
         </TouchableOpacity>
       </View>
 
@@ -340,7 +343,7 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
     letterSpacing: -0.5,
   },
-  notificationButton: {
+  headerActionButton: {
     width: 40,
     height: 40,
     borderRadius: 20,

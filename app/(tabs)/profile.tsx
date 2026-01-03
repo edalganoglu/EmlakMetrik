@@ -378,13 +378,13 @@ const styles = StyleSheet.create({
     },
     profileName: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         marginBottom: 4,
     },
     profileRole: {
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#94a3b8',
     },
 
@@ -407,19 +407,19 @@ const styles = StyleSheet.create({
     },
     balanceLabel: {
         fontSize: 12,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: '#94a3b8',
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
     balanceValue: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
     },
     balanceUnit: {
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#94a3b8',
     },
     topUpButton: {
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     },
     topUpText: {
         color: '#fff',
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         fontSize: 14,
     },
 
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         color: Colors.dark.text,
         marginBottom: 4,
     },
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: '#cbd5e1',
         marginLeft: 4,
     },
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     },
     preferenceTitle: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Manrope_600SemiBold',
         color: Colors.dark.text,
     },
     preferenceSubtitle: {
@@ -550,12 +550,12 @@ const styles = StyleSheet.create({
     },
     logoutText: {
         color: '#ef4444',
-        fontWeight: 'bold',
+        fontFamily: 'Manrope_700Bold',
         fontSize: 14,
     },
     versionText: {
         fontSize: 12,
-        fontWeight: '500',
+        fontFamily: 'Manrope_500Medium',
         color: '#64748b',
     },
 });
