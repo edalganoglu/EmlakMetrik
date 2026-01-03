@@ -8,7 +8,7 @@ import { EncodingType, readAsStringAsync } from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
@@ -16,6 +16,7 @@ export default function ProfileScreen() {
     const router = useRouter();
     // Removed local profile state as we use global profile
     const [loading, setLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const [uploading, setUploading] = useState(false);
 
     // Form states
@@ -42,6 +43,12 @@ export default function ProfileScreen() {
     }, [profile, user]);
 
     // Removed fetchProfile since data comes from Context
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await refreshProfile();
+        setRefreshing(false);
+    };
 
     const pickImage = async () => {
         try {
@@ -132,7 +139,12 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <ScrollView
+                contentContainerStyle={styles.content}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+            >
 
                 {/* Profile Header */}
                 <View style={styles.profileHeader}>

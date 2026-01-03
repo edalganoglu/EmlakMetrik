@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function WalletScreen() {
@@ -16,6 +16,8 @@ export default function WalletScreen() {
     const balance = profile?.credit_balance ?? 0;
 
     const [transactions, setTransactions] = useState<any[]>([]);
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // Refresh profile when screen comes into focus
@@ -40,7 +42,15 @@ export default function WalletScreen() {
             .order('created_at', { ascending: false })
             .limit(5);
         if (data) setTransactions(data);
+        setInitialLoading(false);
     }
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await refreshProfile();
+        await fetchTransactions();
+        setRefreshing(false);
+    };
 
     async function addTransaction(amount: number, type: 'deposit' | 'spend' | 'reward', description: string) {
         setLoading(true);
@@ -81,6 +91,88 @@ export default function WalletScreen() {
         );
     }
 
+    if (initialLoading) {
+        return (
+            <View style={styles.container}>
+                <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <MaterialIcons name="arrow-back" size={24} color={Colors.dark.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Cüzdanım</Text>
+                    <View style={{ width: 40 }} />
+                </View>
+
+                <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]}>
+                    {/* Balance Card Skeleton */}
+                    <View style={styles.balanceCard}>
+                        <View style={styles.balanceContent}>
+                            <Skeleton width={100} height={14} />
+                            <View style={[styles.balanceRow, { marginTop: 8 }]}>
+                                <Skeleton width={36} height={36} borderRadius={8} />
+                                <Skeleton width={80} height={48} />
+                            </View>
+                            <Skeleton width={40} height={16} />
+                        </View>
+                    </View>
+
+                    {/* Free Section Skeleton */}
+                    <View style={styles.section}>
+                        <Skeleton width={120} height={18} />
+                        <View style={styles.freeCard}>
+                            <View style={styles.freeHeader}>
+                                <Skeleton width={48} height={48} borderRadius={24} />
+                                <View style={{ flex: 1, gap: 8 }}>
+                                    <Skeleton width={100} height={16} />
+                                    <Skeleton width={200} height={14} />
+                                </View>
+                            </View>
+                            <Skeleton width={'100%' as `${number}%`} height={40} borderRadius={8} />
+                        </View>
+                    </View>
+
+                    {/* Packages Section Skeleton */}
+                    <View style={styles.section}>
+                        <View style={styles.packagesHeader}>
+                            <Skeleton width={120} height={18} />
+                            <Skeleton width={70} height={14} />
+                        </View>
+                        <View style={styles.packagesGrid}>
+                            {[1, 2, 3].map(i => (
+                                <View key={i} style={styles.packageCard}>
+                                    <View style={styles.packageCardInner}>
+                                        <View style={styles.packageLeft}>
+                                            <Skeleton width={48} height={48} borderRadius={8} />
+                                            <View style={{ gap: 6 }}>
+                                                <Skeleton width={70} height={16} />
+                                                <Skeleton width={50} height={20} />
+                                            </View>
+                                        </View>
+                                        <Skeleton width={80} height={40} borderRadius={8} />
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* History Section Skeleton */}
+                    <View style={styles.historySection}>
+                        <Skeleton width={100} height={18} />
+                        {[1, 2, 3].map(i => (
+                            <View key={i} style={styles.historyCard}>
+                                <Skeleton width={40} height={40} borderRadius={20} />
+                                <View style={{ flex: 1, gap: 6, marginLeft: 12 }}>
+                                    <Skeleton width={120} height={14} />
+                                    <Skeleton width={80} height={12} />
+                                </View>
+                                <Skeleton width={50} height={16} />
+                            </View>
+                        ))}
+                    </View>
+                </ScrollView>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             {/* Top App Bar */}
@@ -92,7 +184,12 @@ export default function WalletScreen() {
                 <View style={{ width: 40 }} />
             </View>
 
-            <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]}>
+            <ScrollView
+                contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+            >
 
                 {/* Balance Card */}
                 <View style={styles.balanceCard}>

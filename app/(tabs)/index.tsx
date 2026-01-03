@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/Skeleton';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthProvider';
 import { supabase } from '@/lib/supabase';
@@ -11,6 +12,7 @@ export default function HomeScreen() {
   const { user, profile, refreshProfile } = useAuth();
   // removed local profile state
   const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
@@ -21,10 +23,12 @@ export default function HomeScreen() {
     }, [])
   );
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isRefresh = false) => {
     if (!user) return;
     try {
-      setRefreshing(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      }
       // Also refresh profile on pull-to-refresh
       refreshProfile();
 
@@ -39,6 +43,7 @@ export default function HomeScreen() {
     } catch (e) {
       console.error(e);
     } finally {
+      setLoading(false);
       setRefreshing(false);
     }
   }, [user]);
@@ -206,6 +211,66 @@ export default function HomeScreen() {
   };
 
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        {/* Skeleton Header */}
+        <View style={styles.topAppBar}>
+          <Skeleton width={140} height={40} borderRadius={8} />
+          <Skeleton width={40} height={40} borderRadius={20} />
+        </View>
+
+        {/* Skeleton Profile Card */}
+        <View style={styles.profileSection}>
+          <View style={styles.profileCard}>
+            <View style={styles.profileRow}>
+              <Skeleton width={64} height={64} borderRadius={32} />
+              <View style={{ gap: 8 }}>
+                <Skeleton width={80} height={14} />
+                <Skeleton width={120} height={20} />
+              </View>
+            </View>
+            <View style={styles.creditBadgeContainer}>
+              <View style={styles.creditLabelRow}>
+                <Skeleton width={20} height={20} borderRadius={4} />
+                <Skeleton width={100} height={14} />
+              </View>
+              <Skeleton width={80} height={32} borderRadius={16} />
+            </View>
+          </View>
+        </View>
+
+        {/* Skeleton Section Header */}
+        <View style={styles.sectionHeader}>
+          <Skeleton width={120} height={18} />
+          <Skeleton width={80} height={14} />
+        </View>
+
+        {/* Skeleton Analysis Cards */}
+        <View style={{ paddingHorizontal: 16 }}>
+          {[1, 2, 3].map(i => (
+            <View key={i} style={styles.card}>
+              <Skeleton width={56} height={56} borderRadius={12} />
+              <View style={{ flex: 1, gap: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Skeleton width={120} height={16} />
+                  <Skeleton width={70} height={16} />
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <View style={{ gap: 4 }}>
+                    <Skeleton width={150} height={12} />
+                    <Skeleton width={60} height={11} />
+                  </View>
+                  <Skeleton width={50} height={22} borderRadius={6} />
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -221,7 +286,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         }
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchData} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchData(true)} />}
         contentContainerStyle={styles.contentList}
       />
 

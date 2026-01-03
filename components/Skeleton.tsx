@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, ViewStyle } from 'react-native';
 
 interface SkeletonProps {
-    width?: number | string;
-    height?: number | string;
+    width?: number | `${number}%`;
+    height?: number | `${number}%`;
     borderRadius?: number;
     style?: ViewStyle;
 }
@@ -55,6 +55,6 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
 const styles = StyleSheet.create({
     skeleton: {
-        backgroundColor: '#e2e8f0', // slate-200
+        backgroundColor: '#334155', // slate-700 (dark mode)
     },
 });

@@ -70,6 +70,8 @@ function RootLayoutNav() {
         <Stack.Screen name="analysis/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="calculator" options={{ headerShown: false }} />
         <Stack.Screen name="wallet" options={{ headerShown: false }} />
+        <Stack.Screen name="notifications" options={{ headerShown: false }} />
+        <Stack.Screen name="security" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
       <StatusBar style="light" />

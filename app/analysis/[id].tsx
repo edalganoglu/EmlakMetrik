@@ -165,407 +165,93 @@ export default function AnalysisResultScreen() {
             <head>
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Emlak Yatırım Analiz Raporu</title>
+                <title>Ekspera - Yatırım Analiz Raporu</title>
                 <style>
-                    @page { margin: 0; }
+                    @page { margin: 80px 60px; size: A4; }
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     body { 
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                        background: #ffffff; 
-                        color: #1e293b; 
-                        padding: 40px;
-                        line-height: 1.6;
-                        font-size: 14px;
+                        font-family: 'Helvetica Neue', Arial, sans-serif;
+                        background: #fff; 
+                        color: #000; 
+                        font-size: 11px;
+                        line-height: 1.5;
+                        padding: 0 20px;
                     }
                     
-                    /* Header with Logo and Agent Info */
+                    /* Page Break Rules */
+                    .section, .metrics-row, .analysis-notes, .property-header { page-break-inside: avoid; }
+                    
+                    /* Header - Agent Only */
                     .report-header {
                         display: flex;
-                        justify-content: space-between;
-                        align-items: flex-start;
-                        padding-bottom: 24px;
-                        border-bottom: 3px solid #2563eb;
+                        justify-content: flex-end;
+                        padding: 0 0 24px 0;
                         margin-bottom: 32px;
                     }
-                    .logo-section {
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                    }
-                    .logo-icon {
-                        width: 48px;
-                        height: 48px;
-                        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-                        border-radius: 10px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: #fff;
-                        font-size: 24px;
-                        font-weight: bold;
-                    }
-                    .logo-text {
-                        font-size: 28px;
-                        font-weight: 800;
-                        color: #1e293b;
-                        letter-spacing: -0.5px;
-                    }
-                    .logo-subtitle {
-                        font-size: 12px;
-                        color: #64748b;
-                        font-weight: 500;
-                    }
+                    .agent-section { display: flex; align-items: center; gap: 12px; }
+                    .agent-info { text-align: right; }
+                    .agent-name { font-size: 12px; font-weight: 700; color: #000; }
+                    .agent-title { font-size: 9px; color: #000; text-transform: uppercase; letter-spacing: 1px; }
+                    .agent-contact { font-size: 9px; color: #000; }
+                    .agent-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+                    .agent-avatar-placeholder { width: 48px; height: 48px; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: 700; }
                     
-                    .agent-section {
-                        text-align: right;
-                        display: flex;
-                        align-items: center;
-                        gap: 16px;
-                    }
-                    .agent-info {
-                        text-align: right;
-                    }
-                    .agent-name {
-                        font-size: 16px;
-                        font-weight: 700;
-                        color: #1e293b;
-                        margin-bottom: 2px;
-                    }
-                    .agent-title {
-                        font-size: 12px;
-                        color: #64748b;
-                        margin-bottom: 4px;
-                    }
-                    .agent-contact {
-                        font-size: 12px;
-                        color: #2563eb;
-                        font-weight: 600;
-                    }
-                    .agent-avatar {
-                        width: 64px;
-                        height: 64px;
-                        border-radius: 50%;
-                        object-fit: cover;
-                        border: 3px solid #e2e8f0;
-                    }
-                    .agent-avatar-placeholder {
-                        width: 64px;
-                        height: 64px;
-                        border-radius: 50%;
-                        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: #fff;
-                        font-size: 28px;
-                        font-weight: bold;
-                    }
+                    /* Property Header */
+                    .property-header { margin-bottom: 40px; }
+                    .property-title { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+                    .property-location { font-size: 10px; color: #000; margin-bottom: 12px; }
+                    .property-price { font-size: 28px; font-weight: 700; color: #000; margin-bottom: 20px; }
+                    .report-meta { display: flex; gap: 40px; }
+                    .meta-item { }
+                    .meta-label { font-size: 8px; color: #000; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+                    .meta-value { font-size: 11px; font-weight: 600; color: #000; }
                     
-                    /* Property Title */
-                    .property-header {
-                        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-                        border: 1px solid #e2e8f0;
-                        border-radius: 12px;
-                        padding: 24px;
-                        margin-bottom: 24px;
-                    }
-                    .property-title {
-                        font-size: 22px;
-                        font-weight: 700;
-                        color: #1e293b;
-                        margin-bottom: 8px;
-                    }
-                    .property-location {
-                        font-size: 14px;
-                        color: #64748b;
-                        display: flex;
-                        align-items: center;
-                        gap: 6px;
-                        margin-bottom: 16px;
-                    }
-                    .property-price {
-                        font-size: 28px;
-                        font-weight: 800;
-                        color: #2563eb;
-                    }
-                    .report-meta {
-                        display: flex;
-                        justify-content: space-between;
-                        margin-top: 16px;
-                        padding-top: 16px;
-                        border-top: 1px solid #e2e8f0;
-                    }
-                    .meta-item {
-                        text-align: center;
-                    }
-                    .meta-label {
-                        font-size: 11px;
-                        color: #94a3b8;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                    }
-                    .meta-value {
-                        font-size: 14px;
-                        font-weight: 600;
-                        color: #334155;
-                    }
+                    /* Key Metrics */
+                    .metrics-row { display: flex; gap: 48px; margin-bottom: 40px; padding: 24px 0; }
+                    .metric-item { }
+                    .metric-label { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: #000; margin-bottom: 4px; }
+                    .metric-value { font-size: 24px; font-weight: 700; color: #000; }
+                    .metric-unit { font-size: 12px; font-weight: 400; }
+                    .metric-status { font-size: 9px; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
                     
-                    /* Key Metrics Banner */
-                    .metrics-banner {
-                        display: flex;
-                        gap: 16px;
-                        margin-bottom: 24px;
-                    }
-                    .metric-box {
-                        flex: 1;
-                        background: #fff;
-                        border: 1px solid #e2e8f0;
-                        border-radius: 12px;
-                        padding: 20px;
-                        text-align: center;
-                        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                    }
-                    .metric-box.highlight {
-                        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-                        border: none;
-                        color: #fff;
-                    }
-                    .metric-label {
-                        font-size: 11px;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                        color: #64748b;
-                        margin-bottom: 8px;
-                    }
-                    .metric-box.highlight .metric-label {
-                        color: rgba(255,255,255,0.8);
-                    }
-                    .metric-value {
-                        font-size: 28px;
-                        font-weight: 800;
-                        color: #1e293b;
-                    }
-                    .metric-box.highlight .metric-value {
-                        color: #fff;
-                    }
-                    .metric-unit {
-                        font-size: 14px;
-                        font-weight: 500;
-                    }
-                    .metric-status {
-                        font-size: 11px;
-                        font-weight: 600;
-                        padding: 4px 10px;
-                        border-radius: 20px;
-                        margin-top: 8px;
-                        display: inline-block;
-                    }
-                    .status-good { background: #dcfce7; color: #166534; }
-                    .status-warning { background: #fef9c3; color: #854d0e; }
-                    .status-bad { background: #fee2e2; color: #991b1b; }
+                    /* Status Box */
+                    .status-box { margin-bottom: 32px; padding: 16px 0; }
+                    .status-title { font-size: 10px; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+                    .status-text { font-size: 11px; color: #000; line-height: 1.6; }
                     
                     /* Section */
-                    .section {
-                        background: #fff;
-                        border: 1px solid #e2e8f0;
-                        border-radius: 12px;
-                        margin-bottom: 20px;
-                        overflow: hidden;
-                        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                    }
-                    .section-header {
-                        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-                        padding: 16px 20px;
-                        border-bottom: 1px solid #e2e8f0;
-                    }
-                    .section-title {
-                        font-size: 16px;
-                        font-weight: 700;
-                        color: #1e293b;
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                    }
-                    .section-icon {
-                        width: 24px;
-                        height: 24px;
-                        background: #2563eb;
-                        border-radius: 6px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: #fff;
-                        font-size: 12px;
-                    }
-                    .section-body {
-                        padding: 20px;
-                    }
+                    .section { margin-bottom: 32px; }
+                    .section-title { font-size: 10px; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; }
                     
                     /* Data Rows */
-                    .data-row {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 12px 0;
-                        border-bottom: 1px solid #f1f5f9;
-                    }
-                    .data-row:last-child {
-                        border-bottom: none;
-                    }
-                    .data-row.highlight {
-                        background: #f8fafc;
-                        margin: 0 -20px;
-                        padding: 12px 20px;
-                    }
-                    .data-label {
-                        color: #64748b;
-                        font-size: 14px;
-                    }
-                    .data-value {
-                        font-weight: 600;
-                        color: #1e293b;
-                        font-size: 14px;
-                    }
-                    .data-value.positive { color: #16a34a; }
-                    .data-value.negative { color: #dc2626; }
-                    .data-value.primary { color: #2563eb; }
-                    .data-description {
-                        font-size: 12px;
-                        color: #94a3b8;
-                        margin-top: 4px;
-                    }
+                    .data-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; }
+                    .data-label { font-size: 11px; color: #000; }
+                    .data-value { font-size: 11px; font-weight: 600; color: #000; }
+                    .data-row.total { padding-top: 16px; margin-top: 8px; }
+                    .data-row.total .data-label, .data-row.total .data-value { font-weight: 700; }
                     
-                    /* Two Column Grid */
-                    .two-col {
-                        display: flex;
-                        gap: 20px;
-                    }
-                    .two-col > div {
-                        flex: 1;
-                    }
-                    
-                    /* Badge */
-                    .badge {
-                        display: inline-block;
-                        padding: 4px 12px;
-                        border-radius: 20px;
-                        font-size: 12px;
-                        font-weight: 600;
-                    }
-                    .badge-success { background: #dcfce7; color: #166534; }
-                    .badge-danger { background: #fee2e2; color: #991b1b; }
-                    .badge-warning { background: #fef9c3; color: #854d0e; }
-                    .badge-info { background: #dbeafe; color: #1d4ed8; }
+                    /* Two Column */
+                    .two-col { display: flex; gap: 60px; }
+                    .two-col > div { flex: 1; }
                     
                     /* Analysis Notes */
-                    .analysis-notes {
-                        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-                        border: 1px solid #bae6fd;
-                        border-radius: 12px;
-                        padding: 20px;
-                        margin-bottom: 20px;
-                    }
-                    .notes-title {
-                        font-size: 14px;
-                        font-weight: 700;
-                        color: #0369a1;
-                        margin-bottom: 12px;
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                    }
-                    .notes-content {
-                        font-size: 13px;
-                        color: #0c4a6e;
-                        line-height: 1.7;
-                    }
-                    .notes-content ul {
-                        margin-left: 20px;
-                        margin-top: 8px;
-                    }
-                    .notes-content li {
-                        margin-bottom: 6px;
-                    }
+                    .analysis-notes { margin-bottom: 32px; padding: 20px 0; }
+                    .notes-title { font-size: 10px; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
+                    .notes-content { font-size: 11px; color: #000; line-height: 1.7; }
+                    .notes-content ul { margin-left: 16px; margin-top: 8px; }
+                    .notes-content li { margin-bottom: 4px; }
                     
                     /* Footer */
-                    .report-footer {
-                        margin-top: 40px;
-                        padding-top: 24px;
-                        border-top: 2px solid #e2e8f0;
-                        text-align: center;
-                    }
-                    .footer-brand {
-                        font-size: 16px;
-                        font-weight: 700;
-                        color: #2563eb;
-                        margin-bottom: 8px;
-                    }
-                    .footer-text {
-                        font-size: 11px;
-                        color: #94a3b8;
-                        line-height: 1.6;
-                    }
-                    .footer-disclaimer {
-                        font-size: 10px;
-                        color: #cbd5e1;
-                        margin-top: 16px;
-                        padding: 12px;
-                        background: #f8fafc;
-                        border-radius: 8px;
-                    }
-                    
-                    /* Warning Box */
-                    .warning-box {
-                        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-                        border: 1px solid #f59e0b;
-                        border-radius: 12px;
-                        padding: 16px 20px;
-                        margin-bottom: 20px;
-                    }
-                    .warning-title {
-                        font-size: 14px;
-                        font-weight: 700;
-                        color: #92400e;
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        margin-bottom: 8px;
-                    }
-                    .warning-text {
-                        font-size: 13px;
-                        color: #78350f;
-                    }
-                    
-                    /* Success Box */
-                    .success-box {
-                        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-                        border: 1px solid #22c55e;
-                        border-radius: 12px;
-                        padding: 16px 20px;
-                        margin-bottom: 20px;
-                    }
-                    .success-title {
-                        font-size: 14px;
-                        font-weight: 700;
-                        color: #166534;
-                        margin-bottom: 8px;
-                    }
-                    .success-text {
-                        font-size: 13px;
-                        color: #14532d;
-                    }
+                    .report-footer { margin-top: 60px; padding-top: 24px; text-align: center; }
+                    .footer-logo { margin-bottom: 16px; }
+                    .footer-logo img { height: 40px; }
+                    .footer-text { font-size: 9px; color: #000; margin-bottom: 16px; }
+                    .footer-disclaimer { font-size: 8px; color: #000; line-height: 1.5; max-width: 500px; margin: 0 auto; }
                 </style>
             </head>
             <body>
-                <!-- Header with Logo and Agent -->
+                <!-- Header - Agent Only -->
                 <div class="report-header">
-                    <div class="logo-section">
-                        <div class="logo-icon">E</div>
-                        <div>
-                            <div class="logo-text">EmlakMetrik</div>
-                            <div class="logo-subtitle">Profesyonel Gayrimenkul Analizi</div>
-                        </div>
-                    </div>
                     <div class="agent-section">
                         <div class="agent-info">
                             <div class="agent-name">${agentName}</div>
@@ -582,7 +268,7 @@ export default function AnalysisResultScreen() {
                 <!-- Property Info -->
                 <div class="property-header">
                     <div class="property-title">${property.title || 'Yatırım Mülkü Analizi'}</div>
-                    <div class="property-location">📍 ${property.location || 'Konum Belirtilmemiş'}</div>
+                    <div class="property-location">${property.location || 'Konum Belirtilmemiş'}</div>
                     <div class="property-price">₺${(property.price || 0).toLocaleString('tr-TR')}</div>
                     <div class="report-meta">
                         <div class="meta-item">
@@ -605,47 +291,37 @@ export default function AnalysisResultScreen() {
                 </div>
                 
                 <!-- Key Metrics -->
-                <div class="metrics-banner">
-                    <div class="metric-box highlight">
+                <div class="metrics-row">
+                    <div class="metric-item">
                         <div class="metric-label">Amortisman Süresi</div>
                         <div class="metric-value">${(results.amortization || 0).toFixed(1)} <span class="metric-unit">Yıl</span></div>
-                        <div class="metric-status ${(results.amortization || 0) <= 15 ? 'status-good' : (results.amortization || 0) <= 25 ? 'status-warning' : 'status-bad'}" style="background: rgba(255,255,255,0.2); color: #fff;">
-                            ${(results.amortization || 0) <= 15 ? 'Mükemmel' : (results.amortization || 0) <= 25 ? 'Ortalama' : 'Uzun Vadeli'}
-                        </div>
+                        <div class="metric-status">${(results.amortization || 0) <= 15 ? 'Mükemmel' : (results.amortization || 0) <= 25 ? 'Ortalama' : 'Uzun Vadeli'}</div>
                     </div>
-                    <div class="metric-box">
+                    <div class="metric-item">
                         <div class="metric-label">${results.useLoan ? 'Cash on Cash ROI' : 'Yıllık Getiri'}</div>
-                        <div class="metric-value" style="color: ${(results.roi || 0) > 5 ? '#16a34a' : '#f59e0b'}">%${(results.roi || 0).toFixed(1)}</div>
-                        <div class="metric-status ${(results.roi || 0) > 8 ? 'status-good' : (results.roi || 0) > 4 ? 'status-warning' : 'status-bad'}">
-                            ${(results.roi || 0) > 8 ? 'Yüksek Getiri' : (results.roi || 0) > 4 ? 'Orta Getiri' : 'Düşük Getiri'}
-                        </div>
+                        <div class="metric-value">%${(results.roi || 0).toFixed(1)}</div>
+                        <div class="metric-status">${(results.roi || 0) > 8 ? 'Yüksek Getiri' : (results.roi || 0) > 4 ? 'Orta Getiri' : 'Düşük Getiri'}</div>
                     </div>
-                    <div class="metric-box">
+                    <div class="metric-item">
                         <div class="metric-label">Net Aylık Gelir</div>
-                        <div class="metric-value" style="color: ${(results.netMonthlyIncome || 0) >= 0 ? '#16a34a' : '#dc2626'}">
-                            ₺${Math.abs(results.netMonthlyIncome || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
-                        </div>
-                        <div class="metric-status ${(results.netMonthlyIncome || 0) >= 0 ? 'status-good' : 'status-bad'}">
-                            ${(results.netMonthlyIncome || 0) >= 0 ? 'Pozitif Nakit Akışı' : 'Negatif Nakit Akışı'}
-                        </div>
+                        <div class="metric-value">₺${Math.abs(results.netMonthlyIncome || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</div>
+                        <div class="metric-status">${(results.netMonthlyIncome || 0) >= 0 ? 'Pozitif Nakit Akışı' : 'Negatif Nakit Akışı'}</div>
                     </div>
                 </div>
                 
                 ${(results.netMonthlyIncome || 0) < 0 ? `
-                <div class="warning-box">
-                    <div class="warning-title">⚠️ Dikkat: Negatif Nakit Akışı</div>
-                    <div class="warning-text">
-                        Bu yatırım aylık <strong>₺${Math.abs(results.netMonthlyIncome || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</strong> ek sermaye gerektirir. 
-                        Kira geliri, aylık giderleri (aidat + kredi taksiti) karşılamamaktadır. 
-                        Yatırım kararı vermeden önce nakit akışı planlaması yapmanız önerilir.
+                <div class="status-box">
+                    <div class="status-title">Dikkat: Negatif Nakit Akışı</div>
+                    <div class="status-text">
+                        Bu yatırım aylık ₺${Math.abs(results.netMonthlyIncome || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ek sermaye gerektirir. 
+                        Kira geliri, aylık giderleri karşılamamaktadır.
                     </div>
                 </div>
                 ` : `
-                <div class="success-box">
-                    <div class="success-title">✅ Pozitif Nakit Akışı</div>
-                    <div class="success-text">
-                        Bu mülk aylık <strong>₺${(results.netMonthlyIncome || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</strong> net gelir üretmektedir. 
-                        Kira geliri, tüm aylık giderleri karşıladıktan sonra kâr bırakmaktadır.
+                <div class="status-box">
+                    <div class="status-title">Pozitif Nakit Akışı</div>
+                    <div class="status-text">
+                        Bu mülk aylık ₺${(results.netMonthlyIncome || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} net gelir üretmektedir.
                     </div>
                 </div>
                 `}
@@ -654,35 +330,28 @@ export default function AnalysisResultScreen() {
                     <!-- Cost Analysis -->
                     <div>
                         <div class="section">
-                            <div class="section-header">
-                                <div class="section-title">
-                                    <span class="section-icon">💰</span>
-                                    Maliyet Analizi
-                                </div>
+                            <div class="section-title">Maliyet Analizi</div>
+                            <div class="data-row">
+                                <span class="data-label">Satış Fiyatı</span>
+                                <span class="data-value">₺${(property.price || 0).toLocaleString('tr-TR')}</span>
                             </div>
-                            <div class="section-body">
-                                <div class="data-row">
-                                    <span class="data-label">Satış Fiyatı</span>
-                                    <span class="data-value">₺${(property.price || 0).toLocaleString('tr-TR')}</span>
-                                </div>
-                                <div class="data-row">
-                                    <span class="data-label">Tapu Harcı (%4)</span>
-                                    <span class="data-value">₺${((property.price || 0) * 0.04).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
-                                </div>
-                                <div class="data-row">
-                                    <span class="data-label">Tadilat/Renovasyon</span>
-                                    <span class="data-value">₺${(property.params?.renovation || 0).toLocaleString('tr-TR')}</span>
-                                </div>
-                                ${results.useLoan ? `
-                                <div class="data-row">
-                                    <span class="data-label">Peşinat</span>
-                                    <span class="data-value">₺${(results.downPayment || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
-                                </div>
-                                ` : ''}
-                                <div class="data-row highlight">
-                                    <span class="data-label"><strong>Toplam Başlangıç Maliyeti</strong></span>
-                                    <span class="data-value primary"><strong>₺${(results.totalInitialCost || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</strong></span>
-                                </div>
+                            <div class="data-row">
+                                <span class="data-label">Tapu Harcı (%4)</span>
+                                <span class="data-value">₺${((property.price || 0) * 0.04).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Tadilat/Renovasyon</span>
+                                <span class="data-value">₺${(property.params?.renovation || 0).toLocaleString('tr-TR')}</span>
+                            </div>
+                            ${results.useLoan ? `
+                            <div class="data-row">
+                                <span class="data-label">Peşinat</span>
+                                <span class="data-value">₺${(results.downPayment || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
+                            </div>
+                            ` : ''}
+                            <div class="data-row total">
+                                <span class="data-label">Toplam Başlangıç Maliyeti</span>
+                                <span class="data-value">₺${(results.totalInitialCost || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
                             </div>
                         </div>
                     </div>
@@ -690,33 +359,24 @@ export default function AnalysisResultScreen() {
                     <!-- Income Analysis -->
                     <div>
                         <div class="section">
-                            <div class="section-header">
-                                <div class="section-title">
-                                    <span class="section-icon">📊</span>
-                                    Gelir-Gider Analizi
-                                </div>
+                            <div class="section-title">Gelir-Gider Analizi</div>
+                            <div class="data-row">
+                                <span class="data-label">Aylık Kira Geliri</span>
+                                <span class="data-value">+₺${(property.monthly_rent || 0).toLocaleString('tr-TR')}</span>
                             </div>
-                            <div class="section-body">
-                                <div class="data-row">
-                                    <span class="data-label">Aylık Kira Geliri</span>
-                                    <span class="data-value positive">+₺${(property.monthly_rent || 0).toLocaleString('tr-TR')}</span>
-                                </div>
-                                <div class="data-row">
-                                    <span class="data-label">Aylık Aidat</span>
-                                    <span class="data-value negative">-₺${(property.params?.dues || 0).toLocaleString('tr-TR')}</span>
-                                </div>
-                                ${results.useLoan ? `
-                                <div class="data-row">
-                                    <span class="data-label">Aylık Kredi Taksiti</span>
-                                    <span class="data-value negative">-₺${(results.monthlyLoanPayment || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
-                                </div>
-                                ` : ''}
-                                <div class="data-row highlight">
-                                    <span class="data-label"><strong>Net Aylık Nakit Akışı</strong></span>
-                                    <span class="data-value ${(results.netMonthlyIncome || 0) >= 0 ? 'positive' : 'negative'}">
-                                        <strong>₺${(results.netMonthlyIncome || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</strong>
-                                    </span>
-                                </div>
+                            <div class="data-row">
+                                <span class="data-label">Aylık Aidat</span>
+                                <span class="data-value">-₺${(property.params?.dues || 0).toLocaleString('tr-TR')}</span>
+                            </div>
+                            ${results.useLoan ? `
+                            <div class="data-row">
+                                <span class="data-label">Aylık Kredi Taksiti</span>
+                                <span class="data-value">-₺${(results.monthlyLoanPayment || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
+                            </div>
+                            ` : ''}
+                            <div class="data-row total">
+                                <span class="data-label">Net Aylık Nakit Akışı</span>
+                                <span class="data-value">₺${(results.netMonthlyIncome || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
                             </div>
                         </div>
                     </div>
@@ -725,33 +385,26 @@ export default function AnalysisResultScreen() {
                 ${results.useLoan ? `
                 <!-- Loan Details -->
                 <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">
-                            <span class="section-icon">🏦</span>
-                            Kredi Finansman Detayları
-                        </div>
-                    </div>
-                    <div class="section-body">
-                        <div class="two-col">
-                            <div>
-                                <div class="data-row">
-                                    <span class="data-label">Kredi Tutarı</span>
-                                    <span class="data-value">₺${(results.loanAmount || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
-                                </div>
-                                <div class="data-row">
-                                    <span class="data-label">Aylık Faiz Oranı</span>
-                                    <span class="data-value">%${(results.loanRate || 0).toFixed(2)}</span>
-                                </div>
+                    <div class="section-title">Kredi Finansman Detayları</div>
+                    <div class="two-col">
+                        <div>
+                            <div class="data-row">
+                                <span class="data-label">Kredi Tutarı</span>
+                                <span class="data-value">₺${(results.loanAmount || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
                             </div>
-                            <div>
-                                <div class="data-row">
-                                    <span class="data-label">Vade Süresi</span>
-                                    <span class="data-value">${results.loanTerm || 0} Ay (${((results.loanTerm || 0) / 12).toFixed(0)} Yıl)</span>
-                                </div>
-                                <div class="data-row">
-                                    <span class="data-label">Aylık Taksit</span>
-                                    <span class="data-value negative">₺${(results.monthlyLoanPayment || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
-                                </div>
+                            <div class="data-row">
+                                <span class="data-label">Aylık Faiz Oranı</span>
+                                <span class="data-value">%${(results.loanRate || 0).toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="data-row">
+                                <span class="data-label">Vade Süresi</span>
+                                <span class="data-value">${results.loanTerm || 0} Ay (${((results.loanTerm || 0) / 12).toFixed(0)} Yıl)</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Aylık Taksit</span>
+                                <span class="data-value">₺${(results.monthlyLoanPayment || 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
                             </div>
                         </div>
                     </div>
@@ -761,34 +414,23 @@ export default function AnalysisResultScreen() {
                 ${results.marketComparison ? `
                 <!-- Market Comparison -->
                 <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">
-                            <span class="section-icon">📈</span>
-                            Piyasa Karşılaştırması
-                        </div>
+                    <div class="section-title">Piyasa Karşılaştırması</div>
+                    <div class="data-row">
+                        <span class="data-label">Bu Mülk m² Fiyatı</span>
+                        <span class="data-value">₺${results.marketComparison.propertyPricePerSqm.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
                     </div>
-                    <div class="section-body">
-                        <div class="data-row">
-                            <span class="data-label">Bu Mülk m² Fiyatı</span>
-                            <span class="data-value">₺${results.marketComparison.propertyPricePerSqm.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Bölge Ortalama m² Fiyatı</span>
-                            <span class="data-value">₺${results.marketComparison.avgPricePerSqm.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
-                        </div>
-                        <div class="data-row highlight">
-                            <span class="data-label"><strong>Piyasa Farkı</strong></span>
-                            <span class="data-value">
-                                <span class="badge ${results.marketComparison.isBelowMarket ? 'badge-success' : 'badge-danger'}">
-                                    ${results.marketComparison.isBelowMarket ? '↓ Piyasanın Altında' : '↑ Piyasanın Üstünde'} 
-                                    (%${Math.abs(results.marketComparison.differencePercent).toFixed(1)})
-                                </span>
-                            </span>
-                        </div>
-                        <div class="data-description" style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 8px;">
-                            ${results.marketComparison.isBelowMarket ?
-                        `✅ <strong>Cazip Fiyat:</strong> Bu mülk, bölge ortalamasının %${Math.abs(results.marketComparison.differencePercent).toFixed(1)} altında fiyatlandırılmış. Bu durum potansiyel bir değer artışı fırsatı sunabilir.` :
-                        `⚠️ <strong>Dikkat:</strong> Bu mülk, bölge ortalamasının %${results.marketComparison.differencePercent.toFixed(1)} üzerinde fiyatlandırılmış. Fiyat pazarlığı veya özel özelliklerin değerlendirilmesi önerilir.`
+                    <div class="data-row">
+                        <span class="data-label">Bölge Ortalama m² Fiyatı</span>
+                        <span class="data-value">₺${results.marketComparison.avgPricePerSqm.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</span>
+                    </div>
+                    <div class="data-row total">
+                        <span class="data-label">Piyasa Farkı</span>
+                        <span class="data-value">${results.marketComparison.isBelowMarket ? 'Piyasanın Altında' : 'Piyasanın Üstünde'} (%${Math.abs(results.marketComparison.differencePercent).toFixed(1)})</span>
+                    </div>
+                    <div class="status-text" style="margin-top: 12px;">
+                        ${results.marketComparison.isBelowMarket ?
+                        `Bu mülk, bölge ortalamasının %${Math.abs(results.marketComparison.differencePercent).toFixed(1)} altında fiyatlandırılmış.` :
+                        `Bu mülk, bölge ortalamasının %${results.marketComparison.differencePercent.toFixed(1)} üzerinde fiyatlandırılmış.`
                     }
                         </div>
                     </div>
@@ -797,7 +439,7 @@ export default function AnalysisResultScreen() {
                 
                 <!-- Analysis Notes -->
                 <div class="analysis-notes">
-                    <div class="notes-title">📋 Analiz Değerlendirmesi</div>
+                    <div class="notes-title">Analiz Değerlendirmesi</div>
                     <div class="notes-content">
                         <p>Bu yatırım analizi, girilen veriler temel alınarak hazırlanmıştır. Değerlendirme özeti:</p>
                         <ul>
@@ -811,16 +453,14 @@ export default function AnalysisResultScreen() {
                 
                 <!-- Footer -->
                 <div class="report-footer">
-                    <div class="footer-brand">EmlakMetrik</div>
                     <div class="footer-text">
-                        Profesyonel Gayrimenkul Yatırım Analiz Platformu<br>
-                        Bu rapor ${reportDate} tarihinde oluşturulmuştur.
+                        Bu rapor ${reportDate} tarihinde Ekspera tarafından oluşturulmuştur.
                     </div>
                     <div class="footer-disclaimer">
-                        <strong>Sorumluluk Reddi:</strong> Bu rapor yalnızca bilgilendirme amaçlıdır ve yatırım tavsiyesi niteliği taşımaz. 
+                        Sorumluluk Reddi: Bu rapor yalnızca bilgilendirme amaçlıdır ve yatırım tavsiyesi niteliği taşımaz. 
                         Tüm veriler kullanıcı tarafından girilmiştir. Yatırım kararları vermeden önce profesyonel danışmanlık hizmeti almanız önerilir. 
-                        EmlakMetrik, bu raporda yer alan bilgilerin doğruluğu veya tamlığı konusunda herhangi bir garanti vermez.
-                        <br><br>© ${currentYear} EmlakMetrik - Tüm hakları saklıdır.
+                        Ekspera, bu raporda yer alan bilgilerin doğruluğu veya tamlığı konusunda herhangi bir garanti vermez.
+                        <br><br>© ${currentYear} Ekspera - Tüm hakları saklıdır.
                     </div>
                 </div>
             </body>
@@ -867,30 +507,63 @@ export default function AnalysisResultScreen() {
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Skeleton width={40} height={40} borderRadius={20} />
-                    <Skeleton width={150} height={24} />
+                    <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+                        <MaterialIcons name="arrow-back" size={24} color={Colors.dark.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Analiz Sonuçları</Text>
                     <Skeleton width={40} height={40} borderRadius={20} />
                 </View>
 
-                <View style={styles.content}>
+                {/* Sticky Bar Skeleton */}
+                <View style={styles.stickyBar}>
+                    <View style={styles.balanceRow}>
+                        <Skeleton width={100} height={12} />
+                        <Skeleton width={80} height={20} />
+                    </View>
+                    <Skeleton width={140} height={44} borderRadius={22} />
+                </View>
+
+                <ScrollView style={styles.content}>
+                    {/* Overview Card Skeleton */}
                     <View style={styles.card}>
-                        <Skeleton width={120} height={24} style={{ marginBottom: 16 }} />
+                        <Skeleton width={120} height={20} style={{ marginBottom: 16 }} />
                         <View style={styles.overviewGrid}>
-                            <View>
-                                <Skeleton width={80} height={14} style={{ marginBottom: 4 }} />
-                                <Skeleton width={60} height={24} />
+                            <View style={{ alignItems: 'center', gap: 8 }}>
+                                <Skeleton width={80} height={14} />
+                                <Skeleton width={60} height={28} />
                             </View>
-                            <View>
-                                <Skeleton width={80} height={14} style={{ marginBottom: 4 }} />
-                                <Skeleton width={60} height={24} />
+                            <View style={{ alignItems: 'center', gap: 8 }}>
+                                <Skeleton width={80} height={14} />
+                                <Skeleton width={60} height={28} />
+                            </View>
+                            <View style={{ alignItems: 'center', gap: 8 }}>
+                                <Skeleton width={80} height={14} />
+                                <Skeleton width={60} height={28} />
+                            </View>
+                            <View style={{ alignItems: 'center', gap: 8 }}>
+                                <Skeleton width={80} height={14} />
+                                <Skeleton width={60} height={28} />
                             </View>
                         </View>
                     </View>
 
+                    {/* Chart Card Skeleton */}
                     <View style={styles.card}>
-                        <Skeleton width="100%" height={200} borderRadius={16} />
+                        <Skeleton width={150} height={20} style={{ marginBottom: 16 }} />
+                        <Skeleton width={300} height={180} borderRadius={12} />
                     </View>
-                </View>
+
+                    {/* Details Card Skeleton */}
+                    <View style={styles.card}>
+                        <Skeleton width={120} height={20} style={{ marginBottom: 16 }} />
+                        {[1, 2, 3, 4].map(i => (
+                            <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                                <Skeleton width={120} height={14} />
+                                <Skeleton width={80} height={14} />
+                            </View>
+                        ))}
+                    </View>
+                </ScrollView>
             </View>
         );
     }
