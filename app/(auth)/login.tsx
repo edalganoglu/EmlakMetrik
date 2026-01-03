@@ -2,6 +2,7 @@ import { Colors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import * as AuthSession from 'expo-auth-session';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
@@ -10,7 +11,6 @@ import {
     ActivityIndicator,
     Alert,
     Animated,
-    Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -258,7 +258,8 @@ export default function LoginScreen() {
                         <Image
                             source={require('@/assets/images/logo-vertical.png')}
                             style={{ width: 180, height: 60 }}
-                            resizeMode="contain"
+                            contentFit="contain"
+                            transition={300}
                         />
                     </View>
                     <Text style={styles.heroTitle}>Güvenle Analiz Edin</Text>

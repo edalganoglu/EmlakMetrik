@@ -3,9 +3,10 @@ import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
@@ -91,7 +92,8 @@ export default function HomeScreen() {
           <Image
             source={require('@/assets/images/logo-vertical.png')}
             style={{ width: 140, height: 40 }}
-            resizeMode="contain"
+            contentFit="contain"
+            transition={300}
           />
         </View>
         <TouchableOpacity
@@ -109,6 +111,7 @@ export default function HomeScreen() {
             <Image
               source={{ uri: profile?.avatar_url || 'https://placehold.co/150' }}
               style={styles.avatar}
+              transition={300} // Smooth fade in for remote images
             />
             <View>
               <Text style={styles.greetingText}>Hoşgeldin,</Text>

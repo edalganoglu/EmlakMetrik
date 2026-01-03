@@ -2,10 +2,11 @@ import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function OnboardingScreen() {
@@ -68,7 +69,8 @@ export default function OnboardingScreen() {
                         <Image
                             source={require('@/assets/images/reward-credit.png')}
                             style={styles.image}
-                            resizeMode="cover"
+                            contentFit="cover"
+                            transition={300}
                         />
                     </View>
 

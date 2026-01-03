@@ -15,6 +15,7 @@ import {
   Manrope_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/manrope';
+import { Asset } from 'expo-asset';
 import * as SplashScreen from 'expo-splash-screen';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -81,7 +82,7 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     Manrope_400Regular,
     Manrope_500Medium,
     Manrope_600SemiBold,
@@ -89,13 +90,34 @@ export default function RootLayout() {
     Manrope_800ExtraBold,
   });
 
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
+
   useEffect(() => {
-    if (loaded) {
+    async function loadAssets() {
+      try {
+        await Asset.loadAsync([
+          require('@/assets/images/logo-vertical.png'),
+          require('@/assets/images/reward-credit.png'),
+        ]);
+      } catch (e) {
+        console.warn('Error loading assets:', e);
+      } finally {
+        setAssetsLoaded(true);
+      }
+    }
+
+    loadAssets();
+  }, []);
+
+  const isReady = fontsLoaded && assetsLoaded;
+
+  useEffect(() => {
+    if (isReady) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [isReady]);
 
-  if (!loaded) {
+  if (!isReady) {
     return null;
   }
 
