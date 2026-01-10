@@ -1,7 +1,9 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '@/contexts/AuthProvider';
@@ -95,6 +97,11 @@ export default function RootLayout() {
   useEffect(() => {
     async function loadAssets() {
       try {
+        // Request App Tracking Transparency permission on iOS
+        if (Platform.OS === 'ios') {
+          await requestTrackingPermissionsAsync();
+        }
+
         await Asset.loadAsync([
           require('@/assets/images/logo-vertical.png'),
           require('@/assets/images/reward-credit.png'),

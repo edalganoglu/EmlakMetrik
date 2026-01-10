@@ -1,0 +1,115 @@
+{
+  "identifier" : "9B8A7C6D-5E4F-3A2B-1C0D-9E8F7A6B5C4D",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "29.99",
+      "familyShareable" : false,
+      "internalID" : "credits_20",
+      "localizations" : [
+        {
+          "description" : "20 kredi paketi ile analizlerinize başlayın",
+          "displayName" : "Başlangıç - 20 Kredi",
+          "locale" : "tr"
+        }
+      ],
+      "productID" : "credits_20",
+      "referenceName" : "Başlangıç - 20 Kredi",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "129.99",
+      "familyShareable" : false,
+      "internalID" : "credits_100",
+      "localizations" : [
+        {
+          "description" : "100 kredi paketi ile profesyonel analizler yapın",
+          "displayName" : "Pro - 100 Kredi",
+          "locale" : "tr"
+        }
+      ],
+      "productID" : "credits_100",
+      "referenceName" : "Pro - 100 Kredi",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "499.99",
+      "familyShareable" : false,
+      "internalID" : "credits_500",
+      "localizations" : [
+        {
+          "description" : "500 kredi paketi ile ofis düzeyinde analizler",
+          "displayName" : "Ofis - 500 Kredi",
+          "locale" : "tr"
+        }
+      ],
+      "productID" : "credits_500",
+      "referenceName" : "Ofis - 500 Kredi",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "ekspera",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : null,
+    "_locale" : "tr",
+    "_storefront" : "TUR",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Price Increase Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

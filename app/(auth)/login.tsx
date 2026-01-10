@@ -1,12 +1,14 @@
 import { Colors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import * as AuthSession from 'expo-auth-session';
+import * as ExpoCrypto from 'expo-crypto';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -35,6 +37,14 @@ export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [socialLoading, setSocialLoading] = useState<'google' | 'apple' | null>(null);
+    const [isAppleAuthAvailable, setIsAppleAuthAvailable] = useState(false);
+
+    // Check if Apple Authentication is available on this device
+    useEffect(() => {
+        if (Platform.OS === 'ios') {
+            AppleAuthentication.isAvailableAsync().then(setIsAppleAuthAvailable);
+        }
+    }, []);
 
     // For Expo Go, we need to use the Expo scheme
     // In production builds, this will use the custom scheme from app.json
@@ -183,44 +193,56 @@ export default function LoginScreen() {
     }
 
     async function handleAppleSignIn() {
+        // Check if we're on iOS and Apple Auth is available
+        if (Platform.OS !== 'ios') {
+            Alert.alert('Hata', 'Apple ile giriş sadece iOS cihazlarda kullanılabilir.');
+            return;
+        }
+
+        if (!isAppleAuthAvailable) {
+            Alert.alert('Hata', 'Bu cihazda Apple ile giriş desteklenmiyor.');
+            return;
+        }
+
         try {
             setSocialLoading('apple');
 
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'apple',
-                options: {
-                    redirectTo: redirectUrl,
-                    skipBrowserRedirect: true,
-                },
+            // Generate a random nonce for security
+            const rawNonce = Math.random().toString(36).substring(2, 10) +
+                Math.random().toString(36).substring(2, 10);
+            const hashedNonce = await ExpoCrypto.digestStringAsync(
+                ExpoCrypto.CryptoDigestAlgorithm.SHA256,
+                rawNonce
+            );
+
+            // Request Apple authentication
+            const credential = await AppleAuthentication.signInAsync({
+                requestedScopes: [
+                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                ],
+                nonce: hashedNonce,
             });
 
-            if (error) throw error;
+            // Use the identity token to sign in with Supabase
+            if (credential.identityToken) {
+                const { data, error } = await supabase.auth.signInWithIdToken({
+                    provider: 'apple',
+                    token: credential.identityToken,
+                    nonce: rawNonce,
+                });
 
-            if (data?.url) {
-                const result = await WebBrowser.openAuthSessionAsync(
-                    data.url,
-                    redirectUrl,
-                    { showInRecents: true }
-                );
+                if (error) throw error;
 
-                if (result.type === 'success') {
-                    const url = result.url;
-                    // Extract tokens from URL
-                    const params = new URLSearchParams(url.split('#')[1]);
-                    const accessToken = params.get('access_token');
-                    const refreshToken = params.get('refresh_token');
-
-                    if (accessToken && refreshToken) {
-                        const { error: sessionError } = await supabase.auth.setSession({
-                            access_token: accessToken,
-                            refresh_token: refreshToken,
-                        });
-
-                        if (sessionError) throw sessionError;
-                    }
-                }
+                console.log('Apple sign in successful:', data.user?.email);
             }
         } catch (error: any) {
+            // Don't show error for user cancellation
+            if (error.code === 'ERR_REQUEST_CANCELED') {
+                console.log('User cancelled Apple sign in');
+                return;
+            }
+            console.error('Apple sign in error:', error);
             Alert.alert('Hata', error.message || 'Apple ile giriş yapılamadı');
         } finally {
             setSocialLoading(null);
