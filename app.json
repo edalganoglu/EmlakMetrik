@@ -1,17 +1,23 @@
 {
   "expo": {
-    "name": "EmlakMetrik",
-    "slug": "EmlakMetrik",
+    "name": "Ekspera",
+    "slug": "ekspera",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "emlakmetrik",
+    "icon": "./assets/images/logo.jpg",
+    "scheme": "ekspera",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ekspera",
+      "buildNumber": "6",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.ekspera",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -19,7 +25,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -44,11 +53,30 @@
         {
           "photosPermission": "The app accesses your photos to let you set your profile picture."
         }
+      ],
+      [
+        "react-native-iap",
+        {
+          "paymentProvider": "Apple"
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-9004643134564213~7400902239"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c9a13241-4517-46bf-b3c7-4edb1479bce6"
+      }
     }
   }
 }

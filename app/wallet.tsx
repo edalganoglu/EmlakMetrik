@@ -8,12 +8,35 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useIAP } from '@/hooks/useIAP';
+import { useRewardedAd } from '@/hooks/useRewardedAd';
+
 export default function WalletScreen() {
     const { user, profile, refreshProfile } = useAuth();
     const router = useRouter();
     const insets = useSafeAreaInsets();
     // balance is now derived from global profile state
     const balance = profile?.credit_balance ?? 0;
+
+    const { requestPurchase, products } = useIAP({
+        userId: user?.id,
+        onPurchaseSuccess: async (creditAmount) => {
+            await refreshProfile();
+            await fetchTransactions();
+            Alert.alert('Başarılı', `${creditAmount} kredi hesabınıza yüklendi!`);
+        }
+    });
+
+    const { loaded: adLoaded, loading: adLoading, showAd, reloadAd } = useRewardedAd({
+        onRewardEarned: async (amount) => {
+            await addTransaction(amount, 'reward', 'Video Reklam İzleme');
+            await refreshProfile();
+        },
+        onError: (error) => {
+            console.warn('Ad error:', error);
+            Alert.alert('Reklam Hatası', 'Reklam yüklenemedi. Lütfen tekrar deneyin.');
+        }
+    });
 
     const [transactions, setTransactions] = useState<any[]>([]);
     const [initialLoading, setInitialLoading] = useState(true);
@@ -67,28 +90,36 @@ export default function WalletScreen() {
         } else {
             fetchTransactions();
             if (type === 'reward' || type === 'deposit') {
+                // If deposit via IAP, it might be handled by backend usually, but here we do optimistic update or just refresh
+                // For manual reward call:
                 Alert.alert('Başarılı', `${amount} kredi hesabınıza aktarıldı!`);
             }
         }
     }
 
     async function watchAd() {
-        // Simulation
-        setTimeout(() => {
-            addTransaction(2, 'reward', 'Video Reklam İzleme');
-        }, 1000);
+        if (adLoading) {
+            Alert.alert('Bekleyin', 'Reklam yükleniyor...');
+            return;
+        }
+        if (!adLoaded) {
+            Alert.alert('Reklam Hazır Değil', 'Reklam henüz yüklenmedi. Lütfen birkaç saniye bekleyin.');
+            reloadAd();
+            return;
+        }
+        const shown = await showAd();
+        if (!shown) {
+            Alert.alert('Hata', 'Reklam gösterilemedi. Lütfen tekrar deneyin.');
+        }
     }
 
-    async function buyCredits(amount: number, price: string) {
-        // In a real app, this would integrate with IAP/Stripe
-        Alert.alert(
-            'Satın Alımı Onayla',
-            `${amount} Kredi'yi ${price} karşılığında satın almak istiyor musunuz?`,
-            [
-                { text: 'İptal', style: 'cancel' },
-                { text: 'Satın Al', onPress: () => addTransaction(amount, 'deposit', `${amount} Kredi Paketi satın alındı`) }
-            ]
-        );
+    async function buyCredits(sku: string) {
+        // IAP Integration
+        try {
+            await requestPurchase(sku);
+        } catch (error) {
+            Alert.alert('Hata', 'Satın alma başlatılamadı.');
+        }
     }
 
     if (initialLoading) {
@@ -220,9 +251,15 @@ export default function WalletScreen() {
                                 <Text style={styles.freeDesc}>Kısa bir reklam izleyerek hesabına anında +2 kredi yükle.</Text>
                             </View>
                         </View>
-                        <TouchableOpacity style={styles.watchButton} onPress={watchAd}>
+                        <TouchableOpacity 
+                            style={[styles.watchButton, (!adLoaded || adLoading) && styles.watchButtonDisabled]} 
+                            onPress={watchAd}
+                            disabled={adLoading}
+                        >
                             <MaterialIcons name="smart-display" size={20} color="#fff" />
-                            <Text style={styles.watchButtonText}>İzle (+2 Kredi)</Text>
+                            <Text style={styles.watchButtonText}>
+                                {adLoading ? 'Yükleniyor...' : adLoaded ? 'İzle (+2 Kredi)' : 'Hazırlanıyor...'}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -251,8 +288,8 @@ export default function WalletScreen() {
                                         </Text>
                                     </View>
                                 </View>
-                                <TouchableOpacity style={styles.priceButton} onPress={() => buyCredits(20, '₺29.99')}>
-                                    <Text style={styles.priceButtonText}>₺29.99</Text>
+                                <TouchableOpacity style={styles.priceButton} onPress={() => buyCredits('credits_20')}>
+                                    <Text style={styles.priceButtonText}>{(products.find(p => (p as any).productId === 'credits_20') as any)?.localizedPrice ?? '₺29.99'}</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -274,8 +311,8 @@ export default function WalletScreen() {
                                         </Text>
                                     </View>
                                 </View>
-                                <TouchableOpacity style={styles.priceButtonPro} onPress={() => buyCredits(100, '₺129.99')}>
-                                    <Text style={styles.priceButtonTextPro}>₺129.99</Text>
+                                <TouchableOpacity style={styles.priceButtonPro} onPress={() => buyCredits('credits_100')}>
+                                    <Text style={styles.priceButtonTextPro}>{(products.find(p => (p as any).productId === 'credits_100') as any)?.localizedPrice ?? '₺129.99'}</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -294,8 +331,8 @@ export default function WalletScreen() {
                                         </Text>
                                     </View>
                                 </View>
-                                <TouchableOpacity style={styles.priceButton} onPress={() => buyCredits(500, '₺499.99')}>
-                                    <Text style={styles.priceButtonText}>₺499.99</Text>
+                                <TouchableOpacity style={styles.priceButton} onPress={() => buyCredits('credits_500')}>
+                                    <Text style={styles.priceButtonText}>{(products.find(p => (p as any).productId === 'credits_500') as any)?.localizedPrice ?? '₺499.99'}</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -532,6 +569,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 14,
         fontFamily: 'Manrope_700Bold',
+    },
+    watchButtonDisabled: {
+        backgroundColor: '#64748b',
+        opacity: 0.7,
     },
 
     // Store / Packages
